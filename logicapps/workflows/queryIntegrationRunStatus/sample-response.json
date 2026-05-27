@@ -1,0 +1,6 @@
+{
+  "runId": "RUN-90001",
+  "status": "Failed",
+  "errorCategory": "BACKEND_TIMEOUT",
+  "correlationId": "abc-123"
+}

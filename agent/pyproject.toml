@@ -1,0 +1,13 @@
+[project]
+name = "enterprise-integration-agent"
+version = "0.1.0"
+description = "Microsoft Agent Framework and MCP-based enterprise integration assistant."
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

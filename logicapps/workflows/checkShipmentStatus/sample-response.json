@@ -1,0 +1,7 @@
+{
+  "orderNumber": "4500098123",
+  "shipmentStatus": "In Transit",
+  "eta": "2026-05-21",
+  "delayRisk": "Medium",
+  "correlationId": "abc-123"
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "orderNumber": "4500098123",
+    "customerName": "Contoso Retail",
+    "status": "In Transit",
+    "estimatedDeliveryDate": "2026-05-21",
+    "delayRisk": "Medium"
+  },
+  {
+    "orderNumber": "4500098124",
+    "customerName": "Northwind Traders",
+    "status": "Delayed",
+    "estimatedDeliveryDate": "2026-05-27",
+    "delayRisk": "High"
+  }
+]

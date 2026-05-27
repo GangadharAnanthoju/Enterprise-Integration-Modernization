@@ -1,0 +1,11 @@
+[
+  {
+    "invoiceNumber": "INV-10092",
+    "poNumber": "4500098123",
+    "vendorId": "VEND-2001",
+    "invoiceAmount": 12500.75,
+    "expectedAmount": 12500.75,
+    "taxValidation": "Passed",
+    "duplicate": false
+  }
+]

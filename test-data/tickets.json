@@ -1,0 +1,8 @@
+[
+  {
+    "ticketNumber": "INC0012345",
+    "status": "Created",
+    "assignmentGroup": "Integration Support",
+    "correlationId": "abc-123"
+  }
+]

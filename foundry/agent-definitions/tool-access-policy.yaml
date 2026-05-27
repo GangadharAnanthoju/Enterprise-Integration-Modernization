@@ -1,0 +1,4 @@
+policyName: enterprise-integration-tool-access
+rules:
+  - toolRisk: High
+    approvalRequired: true

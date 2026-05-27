@@ -1,0 +1,10 @@
+[
+  {
+    "orderNumber": "4500098123",
+    "carrier": "Global Freight",
+    "trackingNumber": "TRK-90001",
+    "shipmentStatus": "In Transit",
+    "eta": "2026-05-21",
+    "delayRisk": "Medium"
+  }
+]

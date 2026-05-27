@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+httpx
+python-dotenv
+azure-identity
+azure-keyvault-secrets
+azure-monitor-opentelemetry
+opentelemetry-api
+opentelemetry-sdk
+pytest
+pytest-asyncio
+ruff

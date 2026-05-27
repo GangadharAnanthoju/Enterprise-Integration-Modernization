@@ -1,0 +1,5 @@
+{
+  "supplierId": "SUP-1001",
+  "message": "Order delay detected.",
+  "approvalId": "APR-1001"
+}

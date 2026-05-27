@@ -1,0 +1,1 @@
+// Application Insights module placeholder.
