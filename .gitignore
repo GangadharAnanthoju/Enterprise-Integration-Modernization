@@ -20,6 +20,9 @@ env/
 .vscode/
 .idea/
 
+# Local learning notes
+development/
+
 # Azure / local deployment
 .azure/
 *.log
