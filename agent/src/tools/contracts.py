@@ -4,6 +4,13 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 
+# **************** KEEP: GOVERNED TOOL CONTRACTS ****************
+# These are core enterprise contracts, not temporary scaffolding. The storage
+# location can change later, but the agent should always reason through
+# approved tool metadata instead of inventing backend actions.
+# ***************************************************************
+
+
 class RiskLevel(StrEnum):
     """Business risk level for an AI-callable enterprise tool."""
 
