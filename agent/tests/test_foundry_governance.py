@@ -11,5 +11,7 @@ def test_readiness_checks_pass_for_local_governed_agent() -> None:
         "approval_store",
         "audit_store",
         "observability_projection",
+        "mcp_runtime_config",
+        "agent_runtime_adapter",
     }
     assert all(check.status == "pass" for check in report.checks)

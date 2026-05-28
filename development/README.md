@@ -33,4 +33,10 @@ The goal is to make the AI project understandable from an Azure Integration Serv
 | 4B | Project audit events into Foundry and App Insights observability shapes | `step4/step-4b-foundry-observability.md` |
 | 4C | Add local Foundry-style evaluation suite | `step4/step-4c-local-evaluation-suite.md` |
 | 4D | Add operational readiness checks | `step4/step-4d-operational-readiness.md` |
+| 5A | Move required entities into tool contracts | `step5/step-5a-required-entities-in-tool-contract.md` |
+| 5B | Build validated MCP request payloads from tool contracts and entities | `step5/step-5b-mcp-request-payload-builder.md` |
+| 5C | Carry validated request payloads through mock MCP simulation | `step5/step-5c-entity-aware-mock-simulation.md` |
+| 5D | Add MCP runtime configuration for mock and future remote execution | `step5/step-5d-mcp-runtime-config.md` |
+| 5E | Add Foundry agent adapter boundary | `step5/step-5e-foundry-agent-adapter.md` |
+| 5F | Finish Step 5 with readiness checks for MCP config and agent adapter | `step5/step-5f-step-5-readiness-checkpoint.md` |
 | Local setup | Create a root Python virtual environment | `local-python-environment.md` |

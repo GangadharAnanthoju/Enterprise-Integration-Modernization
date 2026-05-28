@@ -65,19 +65,6 @@ INTENT_TOOL_RULES: tuple[tuple[tuple[str, ...], str], ...] = (
     (("correlation", "status"), "queryIntegrationRunStatus"),
 )
 
-REQUIRED_ENTITIES_BY_TOOL: dict[str, tuple[str, ...]] = {
-    # Readiness is tool-specific. A shipment ID should not make an order lookup
-    # executable, and an order ID should not make a shipment action executable.
-    "getOrderStatus": ("order_id",),
-    "validateInvoice": ("invoice_id",),
-    "checkShipmentStatus": ("shipment_id",),
-    "sendSupplierNotification": ("shipment_id",),
-    "createApprovalRequest": (),
-    "createServiceNowTicket": (),
-    "queryIntegrationRunStatus": ("correlation_id",),
-}
-
-
 # **************** TEMPORARY UNTIL REAL AGENT PLANNER ****************
 # A Foundry-hosted agent should eventually replace this rule-based detector.
 # Keep the output contract: selected approved MCP tool name or None.
@@ -117,15 +104,14 @@ def extract_entities(user_message: str) -> dict[str, str]:
     return entities
 
 
-# **************** KEEP, BUT MAY MOVE TO TOOL CONTRACTS ****************
-# The required-entity rule is real governance logic. Later it may move into
-# ToolContract metadata or external policy configuration instead of this map.
-# *********************************************************************
 def get_missing_entities(tool_name: str, entities: dict[str, str]) -> list[str]:
     """Return required entity names that are missing for a selected tool."""
 
-    required_entities = REQUIRED_ENTITIES_BY_TOOL.get(tool_name, ())
-    return [entity_name for entity_name in required_entities if entity_name not in entities]
+    tool = get_tool(tool_name)
+    if tool is None:
+        return []
+
+    return [entity_name for entity_name in tool.required_entities if entity_name not in entities]
 
 
 # **************** TEMPORARY AGENT ENTRYPOINT ****************
@@ -259,7 +245,7 @@ def handle_chat_message(
             approval_request=approval_request,
         )
 
-    simulation_result = simulate_mcp_tool(tool, risk_decision, correlation_id)
+    simulation_result = simulate_mcp_tool(tool, risk_decision, correlation_id, entities)
 
     # Only ready, allowed actions reach the MCP boundary from chat.
     return AgentChatResult(

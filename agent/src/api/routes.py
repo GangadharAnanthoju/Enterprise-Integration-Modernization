@@ -9,8 +9,9 @@ from approvals.requests import (
     get_approval_decision,
     get_approval_request,
 )
-from agent_app import AgentChatResult, PlannedAction, handle_chat_message
+from agent_app import AgentChatResult, PlannedAction
 from api.schemas import (
+    AgentAdapterResponse,
     ApprovalDecisionRequest,
     ApprovalDecisionResponse,
     ApprovalExecutionResponse,
@@ -23,6 +24,7 @@ from api.schemas import (
     EvaluationExpectedOutcomeResponse,
     EvaluationResultResponse,
     FoundryTraceResponse,
+    McpServerConfigResponse,
     PlannedActionResponse,
     ReadinessCheckResponse,
     ReadinessReportResponse,
@@ -40,8 +42,15 @@ from foundry.evaluations import (
     run_local_evaluation_suite,
 )
 from foundry.governance import ReadinessCheck, ReadinessReport, run_readiness_checks
+from foundry.agent_adapter import AgentRuntimeAdapter, get_agent_adapter
 from foundry.tracing import FoundryTraceRecord, audit_events_to_foundry_traces
-from mcp.client import McpSimulationResult, simulate_mcp_tool, simulate_mcp_tool_after_approval
+from mcp.client import (
+    McpSimulationResult,
+    load_mcp_config,
+    simulate_mcp_tool,
+    simulate_mcp_tool_after_approval,
+)
+from mcp.schemas import McpServerConfig
 from telemetry.correlation import resolve_correlation_id
 from telemetry.appinsights import AppInsightsCustomEvent, traces_to_appinsights_events
 from tools.contracts import ToolContract
@@ -245,6 +254,7 @@ def _to_tool_response(tool: ToolContract) -> ToolResponse:
         owner=tool.owner,
         version=tool.version,
         operational_impact=tool.operational_impact,
+        required_entities=list(tool.required_entities),
         input_schema_ref=tool.input_schema_ref,
         output_schema_ref=tool.output_schema_ref,
     )
@@ -275,8 +285,30 @@ def _to_simulation_response(result: McpSimulationResult) -> ToolSimulationRespon
         status=result.status,
         risk_decision=result.risk_decision,
         approval_required=result.approval_required,
+        request_payload=result.request.payload if result.request else None,
         result=result.result,
         message=result.message,
+    )
+
+
+def _to_mcp_config_response(config: McpServerConfig) -> McpServerConfigResponse:
+    """Convert internal MCP runtime config to the public API response shape."""
+
+    return McpServerConfigResponse(
+        mode=config.mode.value,
+        server_name=config.server_name,
+        endpoint_configured=config.endpoint_configured,
+        timeout_seconds=config.timeout_seconds,
+    )
+
+
+def _to_agent_adapter_response(adapter: AgentRuntimeAdapter) -> AgentAdapterResponse:
+    """Convert active agent adapter metadata to the public API response shape."""
+
+    return AgentAdapterResponse(
+        name=adapter.name,
+        runtime=adapter.runtime,
+        implementation_status=adapter.implementation_status,
     )
 
 
@@ -350,18 +382,33 @@ async def get_tools() -> list[ToolResponse]:
     return [_to_tool_response(tool) for tool in list_tools()]
 
 
+@router.get("/mcp/config", response_model=McpServerConfigResponse)
+async def get_mcp_config() -> McpServerConfigResponse:
+    """Return safe MCP runtime configuration for diagnostics."""
+
+    return _to_mcp_config_response(load_mcp_config())
+
+
+@router.get("/foundry/agent-adapter", response_model=AgentAdapterResponse)
+async def get_foundry_agent_adapter() -> AgentAdapterResponse:
+    """Return the active agent runtime adapter for diagnostics."""
+
+    return _to_agent_adapter_response(get_agent_adapter())
+
+
 @router.post("/agent/chat", response_model=AgentChatResponse)
 async def chat_with_agent(request: AgentChatRequest) -> AgentChatResponse:
     """Accept a user message through the safe agent shell."""
 
-    # TEMPORARY BACKEND: handle_chat_message is the current rule-based agent
-    # shell. Later this route should call the real Foundry/Agent Framework app.
+    # Route through an adapter so a Foundry/Agent Framework runtime can replace
+    # the local rule-based shell without changing this API endpoint.
     # Resolve correlation once at the API boundary so planning, approval, and
     # MCP simulation can all share the same trace identifier.
     correlation_id = resolve_correlation_id(request.correlation_id)
-    result = handle_chat_message(
-        request.user_message,
-        correlation_id,
+    agent_adapter = get_agent_adapter()
+    result = agent_adapter.chat(
+        user_message=request.user_message,
+        correlation_id=correlation_id,
         simulate_when_ready=request.simulate_when_ready,
     )
     _audit_chat_result(result)
@@ -430,6 +477,7 @@ async def execute_approved_action(approval_id: str) -> ApprovalExecutionResponse
         risk_decision=risk_decision,
         correlation_id=approval_request.correlation_id,
         approval_id=approval_id,
+        entities=approval_request.requested_entities,
     )
     record_audit_event(
         correlation_id=approval_request.correlation_id,

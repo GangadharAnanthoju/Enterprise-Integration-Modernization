@@ -23,6 +23,34 @@ def test_tools_endpoint_returns_catalog() -> None:
     assert len(body) == 7
     assert "getOrderStatus" in tool_names
     assert "sendSupplierNotification" in tool_names
+    order_tool = next(tool for tool in body if tool["name"] == "getOrderStatus")
+    supplier_tool = next(tool for tool in body if tool["name"] == "sendSupplierNotification")
+    assert order_tool["required_entities"] == ["order_id"]
+    assert supplier_tool["required_entities"] == ["shipment_id"]
+
+
+def test_mcp_config_endpoint_returns_safe_runtime_config() -> None:
+    response = client.get("/mcp/config")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body == {
+        "mode": "mock",
+        "server_name": "logic-apps-standard-mcp",
+        "endpoint_configured": False,
+        "timeout_seconds": 30,
+    }
+
+
+def test_foundry_agent_adapter_endpoint_returns_active_runtime_boundary() -> None:
+    response = client.get("/foundry/agent-adapter")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "name": "local-rule-based-agent",
+        "runtime": "local",
+        "implementation_status": "temporary_rule_based",
+    }
 
 
 def test_agent_chat_selects_order_tool_without_calling_it() -> None:
@@ -74,6 +102,7 @@ def test_agent_chat_simulates_allowed_ready_tool_when_requested() -> None:
     assert body["simulation_result"]["status"] == "completed"
     assert body["simulation_result"]["risk_decision"] == "allow"
     assert body["simulation_result"]["approval_required"] is False
+    assert body["simulation_result"]["request_payload"] == {"order_id": "ORD-1001"}
     assert body["simulation_result"]["result"]["orderNumber"] == "4500098123"
     assert body["approval_request"] is None
 
@@ -229,6 +258,7 @@ def test_execute_approved_action_simulates_original_high_risk_tool() -> None:
     assert body["simulation_result"]["status"] == "completed"
     assert body["simulation_result"]["risk_decision"] == "require_approval"
     assert body["simulation_result"]["approval_required"] is False
+    assert body["simulation_result"]["request_payload"] == {"shipment_id": "SHIP-3004"}
     assert body["simulation_result"]["result"]["notificationId"] == "NOTIF-1001"
     assert body["simulation_result"]["result"]["status"] == "Sent"
 
@@ -413,6 +443,8 @@ def test_operations_readiness_endpoint_returns_ready_report() -> None:
         "approval_store",
         "audit_store",
         "observability_projection",
+        "mcp_runtime_config",
+        "agent_runtime_adapter",
     }
 
 
@@ -557,6 +589,7 @@ def test_simulate_endpoint_returns_sample_data_for_allowed_tool() -> None:
     assert body["status"] == "completed"
     assert body["risk_decision"] == "allow"
     assert body["approval_required"] is False
+    assert body["request_payload"] is None
     assert body["result"]["orderNumber"] == "4500098123"
 
 

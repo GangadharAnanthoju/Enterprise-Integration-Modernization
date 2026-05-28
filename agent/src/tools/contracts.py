@@ -34,5 +34,6 @@ class ToolContract:
     owner: str
     version: str
     operational_impact: str
+    required_entities: tuple[str, ...]
     input_schema_ref: str
     output_schema_ref: str

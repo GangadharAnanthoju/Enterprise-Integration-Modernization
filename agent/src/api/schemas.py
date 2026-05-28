@@ -56,8 +56,26 @@ class ToolSimulationResponse(BaseModel):
     status: str
     risk_decision: str
     approval_required: bool
+    request_payload: dict[str, Any] | None = None
     result: dict[str, Any] | None
     message: str
+
+
+class McpServerConfigResponse(BaseModel):
+    """Public API shape for MCP server runtime configuration."""
+
+    mode: str
+    server_name: str
+    endpoint_configured: bool
+    timeout_seconds: int
+
+
+class AgentAdapterResponse(BaseModel):
+    """Public API shape for the active agent runtime adapter."""
+
+    name: str
+    runtime: str
+    implementation_status: str
 
 
 class ApprovalRequestResponse(BaseModel):
@@ -226,6 +244,7 @@ class ToolResponse(BaseModel):
     owner: str
     version: str
     operational_impact: str
+    required_entities: list[str]
     input_schema_ref: str
     output_schema_ref: str
 

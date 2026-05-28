@@ -4,7 +4,10 @@ from dataclasses import dataclass
 
 from approvals.requests import APPROVAL_DECISIONS, APPROVAL_REQUESTS
 from audit.events import AUDIT_EVENTS, AuditEvent
+from foundry.agent_adapter import get_agent_adapter
 from foundry.tracing import audit_event_to_foundry_trace
+from mcp.client import load_mcp_config
+from mcp.schemas import McpExecutionMode
 from tools.registry import list_tools
 from tools.risk_policy import evaluate_tool_name
 
@@ -41,6 +44,8 @@ def run_readiness_checks() -> ReadinessReport:
         _check_approval_store(),
         _check_audit_store(),
         _check_observability_projection(),
+        _check_mcp_runtime_config(),
+        _check_agent_runtime_adapter(),
     ]
     report_status = "ready" if all(check.status == "pass" for check in checks) else "needs_attention"
     return ReadinessReport(status=report_status, checks=checks)
@@ -129,4 +134,52 @@ def _check_observability_projection() -> ReadinessCheck:
         name="observability_projection",
         status="fail",
         details="Audit events could not be projected into Foundry-style traces.",
+    )
+
+
+def _check_mcp_runtime_config() -> ReadinessCheck:
+    config = load_mcp_config()
+    if config.mode == McpExecutionMode.MOCK and config.server_name:
+        return ReadinessCheck(
+            name="mcp_runtime_config",
+            status="pass",
+            details=(
+                f"MCP runtime is configured for {config.mode.value} mode using "
+                f"server name '{config.server_name}'."
+            ),
+        )
+
+    if config.mode == McpExecutionMode.REMOTE and config.endpoint_configured:
+        return ReadinessCheck(
+            name="mcp_runtime_config",
+            status="pass",
+            details=(
+                f"MCP runtime is configured for remote mode using "
+                f"server name '{config.server_name}'."
+            ),
+        )
+
+    return ReadinessCheck(
+        name="mcp_runtime_config",
+        status="fail",
+        details="MCP runtime configuration is incomplete.",
+    )
+
+
+def _check_agent_runtime_adapter() -> ReadinessCheck:
+    adapter = get_agent_adapter()
+    if adapter.name and adapter.runtime and adapter.implementation_status:
+        return ReadinessCheck(
+            name="agent_runtime_adapter",
+            status="pass",
+            details=(
+                f"Active agent adapter is '{adapter.name}' "
+                f"with runtime '{adapter.runtime}'."
+            ),
+        )
+
+    return ReadinessCheck(
+        name="agent_runtime_adapter",
+        status="fail",
+        details="Agent runtime adapter metadata is incomplete.",
     )

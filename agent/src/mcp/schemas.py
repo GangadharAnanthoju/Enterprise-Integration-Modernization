@@ -1,1 +1,44 @@
 """MCP request and response schemas."""
+
+from dataclasses import dataclass
+from enum import StrEnum
+from typing import Any
+
+
+# **************** KEEP: MCP BOUNDARY CONTRACTS ****************
+# These local request shapes are the bridge between agent planning and real MCP
+# calls. Later the transport can change, but the adapter should still build an
+# explicit payload from approved tool metadata and validated entities.
+# **************************************************************
+
+
+@dataclass(frozen=True)
+class McpToolRequest:
+    """Request payload prepared for one approved MCP tool call."""
+
+    tool_name: str
+    correlation_id: str
+    payload: dict[str, Any]
+
+
+class McpExecutionMode(StrEnum):
+    """Supported MCP execution modes."""
+
+    MOCK = "mock"
+    REMOTE = "remote"
+
+
+@dataclass(frozen=True)
+class McpServerConfig:
+    """Runtime configuration for the enterprise MCP execution boundary."""
+
+    mode: McpExecutionMode
+    server_name: str
+    endpoint_url: str | None
+    timeout_seconds: int
+
+    @property
+    def endpoint_configured(self) -> bool:
+        """Return whether a remote MCP endpoint URL is configured."""
+
+        return bool(self.endpoint_url)

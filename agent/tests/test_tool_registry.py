@@ -32,6 +32,14 @@ def test_read_only_lookup_tools_are_low_risk() -> None:
     assert require_tool("queryIntegrationRunStatus").risk_level == RiskLevel.LOW
 
 
+def test_tool_contracts_include_required_entities() -> None:
+    assert require_tool("getOrderStatus").required_entities == ("order_id",)
+    assert require_tool("validateInvoice").required_entities == ("invoice_id",)
+    assert require_tool("checkShipmentStatus").required_entities == ("shipment_id",)
+    assert require_tool("sendSupplierNotification").required_entities == ("shipment_id",)
+    assert require_tool("queryIntegrationRunStatus").required_entities == ("correlation_id",)
+
+
 def test_unknown_tool_returns_none_or_clear_error() -> None:
     assert get_tool("deletePurchaseOrder") is None
 

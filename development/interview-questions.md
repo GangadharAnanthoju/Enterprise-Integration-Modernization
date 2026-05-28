@@ -42,6 +42,10 @@ FastAPI is the service interface. It exposes `/agent/chat`, `/tools`, `/tools/{t
 
 Foundry is planned as the agent runtime and governance layer. In this project, Foundry-specific modules are isolated so runtime, tracing, evaluations, and operational controls can be added without rewriting the API, MCP adapter, or tool policy.
 
+**Q: How can the temporary rule-based agent be replaced later?**
+
+FastAPI calls an agent runtime adapter instead of calling the rule-based planner directly. Today the adapter delegates to the local learning implementation. Later, the same adapter boundary can delegate to a Microsoft Foundry / Agent Framework runtime while keeping `/agent/chat` stable.
+
 ## Agent Behavior
 
 **Q: What happens when a user says `Check order ORD-1001`?**
@@ -86,13 +90,33 @@ The local evaluation suite checks behavior-focused cases: correct tool selection
 
 **Q: What does operational readiness mean in this project?**
 
-Readiness means the governed execution path is available: approved tool catalog, high-risk risk policy, approval store, audit store, and observability projection. The `/operations/readiness` endpoint summarizes those checks.
+Readiness means the governed execution path is available: approved tool catalog, high-risk risk policy, approval store, audit store, observability projection, MCP runtime configuration, and agent runtime adapter. The `/operations/readiness` endpoint summarizes those checks.
+
+**Q: How did you finish Step 5?**
+
+Step 5 was finished by adding readiness checks for the new runtime boundaries: MCP runtime configuration and the active agent adapter. That proves the contract-driven MCP request path and Foundry adapter boundary are visible in operational diagnostics.
 
 ## Classes And Contracts
 
 **Q: What is `ToolContract`?**
 
-`ToolContract` is the metadata model for one approved MCP tool. It includes the tool name, business domain, backend system, risk level, owner, version, operational impact, and schema references.
+`ToolContract` is the metadata model for one approved MCP tool. It includes the tool name, business domain, backend system, risk level, owner, version, operational impact, required business entities, and schema references.
+
+**Q: Why move required entities into the tool contract?**
+
+Required entities are part of the governed tool definition. Moving them into `ToolContract` makes the catalog the source of truth for what each MCP action needs before execution.
+
+**Q: How do extracted entities become backend requests?**
+
+The MCP request builder validates extracted entities against `ToolContract.required_entities` and creates a `McpToolRequest` with a correlation ID and payload. Missing required entities raise a clear error instead of creating an incomplete backend request.
+
+**Q: How do you know the mock execution used the right entity values?**
+
+The simulation response now includes the validated `request_payload`, so you can see exactly which MCP payload would have been sent to the backend workflow.
+
+**Q: How is the MCP runtime configured?**
+
+The MCP layer has a runtime config object with mode, server name, optional endpoint URL, and timeout. It defaults to mock mode today and is ready for a future remote Logic Apps Standard MCP endpoint.
 
 **Q: What is `PlannedAction`?**
 
@@ -172,7 +196,7 @@ Separation of concerns, contract-first tool design, policy-driven execution, aud
 
 1. Add an approval request flow for high-risk actions.
 2. Add real MCP server integration backed by Logic Apps Standard.
-3. Add Foundry tracing and evaluation datasets.
+3. Connect the Foundry adapter to a real Microsoft Agent Framework runtime.
 4. Add a front end for chat, tool catalog, risk decisions, and simulation results.
 5. Add role-based access control for who can run or approve tools.
 6. Add persistent audit logs for planned actions and executions.
