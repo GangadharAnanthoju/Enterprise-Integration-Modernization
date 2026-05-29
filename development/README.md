@@ -57,5 +57,11 @@ The goal is to make the AI project understandable from an Azure Integration Serv
 | 8D | Connect environment validation to readiness checks | `step8/step-8d-remote-readiness-checks.md` |
 | 8E | Document Foundry and observability environment settings | `step8/step-8e-foundry-observability-env-notes.md` |
 | 8F | Finish Step 8 environment foundation | `step8/step-8f-step-8-completion.md` |
+| 9A | Start Logic Apps MCP workflow implementation | `step9/step-9a-logic-apps-mcp-plan.md` |
+| 9B | Define getOrderStatus Logic Apps MCP contract | `step9/step-9b-get-order-status-contract.md` |
+| 9C | Configure local getOrderStatus Logic Apps workflow design | `step9/step-9c-local-logic-app-workflow-design.md` |
+| 9D | Add Logic Apps Standard project structure for designer work | `step9/step-9d-logic-apps-standard-project.md` |
+| 9E | Add Logic Apps designer workspace and local setup notes | `step9/step-9e-logic-apps-designer-workspace.md` |
+| 9F | Configure Logic Apps local resource group setting | `step9/step-9f-logic-apps-local-resource-group.md` |
 | Azure setup | Environment variable guide for local and Azure settings | `azure-environment-setup.md` |
 | Local setup | Create a root Python virtual environment | `local-python-environment.md` |

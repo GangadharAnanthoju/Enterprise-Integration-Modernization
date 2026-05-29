@@ -26,6 +26,8 @@ development/
 # Azure / local deployment
 .azure/
 *.log
+logicapps/standard-app/local.settings.json
+logicapps/standard-app/workflow-designtime/
 
 # OS
 Thumbs.db

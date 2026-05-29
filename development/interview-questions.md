@@ -166,6 +166,38 @@ Step 8C adds environment validation through `/operations/environment`. It checks
 
 Step 8D connects environment validation to `/operations/readiness`. Mock mode can be ready without Azure settings, but remote MCP mode cannot be ready unless endpoint and API-key settings are present.
 
+**Q: When do you start creating Logic Apps and exposing them as MCP?**
+
+That starts in Step 9. Steps 6 and 7 prepared the remote MCP client path, and Step 8 prepared the environment and validation foundation. Step 9 is the right point to create the first Logic Apps workflow, expose it as an MCP tool, and connect it to the tested remote execution path.
+
+**Q: Why not create Logic Apps earlier?**
+
+Because the project needed the enterprise safety layers first: approved tool contracts, risk policy, approval gates, audit, observability, remote client, and environment validation. That way, when a real Logic Apps MCP endpoint is added, it plugs into a governed path instead of becoming an uncontrolled direct backend call.
+
+**Q: What does Step 9B add?**
+
+Step 9B defines the first Logic Apps MCP workflow contract for `getOrderStatus`. It documents the POST request, required `order_id`, low-risk policy, sample response, and backend mapping from the governed MCP payload to the backend order lookup key.
+
+**Q: Why start Logic Apps MCP with `getOrderStatus`?**
+
+It is low risk and read-only, so it is the safest first workflow for proving real MCP connectivity. Once the pattern works for lookup, the same contract-first approach can be applied to invoice, shipment, and eventually high-risk approval-gated tools.
+
+**Q: What does Step 9C add?**
+
+Step 9C turns the local `getOrderStatus` workflow from an empty placeholder into an HTTP-triggered Logic Apps workflow definition. It validates `order_id`, returns a sample order-status response when valid, and returns a 400 response when the required entity is missing.
+
+**Q: Why add a separate Logic Apps Standard project folder?**
+
+The full repository is not shaped like a Logic Apps Standard workspace. Step 9D adds `logicapps/standard-app` so the Logic Apps designer can be opened against that folder separately, while the rest of the repo remains organized for the agent, tests, docs, and infrastructure.
+
+**Q: What does Step 9E add?**
+
+Step 9E adds a dedicated VS Code workspace file for the Logic Apps Standard project, a sample request for `getOrderStatus`, and local designer instructions. This lets the workflow be opened separately in VS Code without turning the repository root into the Logic Apps workspace.
+
+**Q: Where is the Logic Apps designer resource group configured?**
+
+For local designer work, it is configured in `logicapps/standard-app/local.settings.json` under `WORKFLOWS_RESOURCE_GROUP_NAME`. The current resource group is `rg-sysint-enterprise-integration-eus`. The committed template is `local.settings.json.example`; the real `local.settings.json` stays ignored.
+
 **Q: What is `PlannedAction`?**
 
 `PlannedAction` is the internal object that packages the selected tool, extracted entities, risk decision, approval requirement, readiness, and missing entities before execution.

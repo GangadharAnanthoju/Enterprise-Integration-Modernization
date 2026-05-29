@@ -1,0 +1,58 @@
+{
+  "tool_name": "getOrderStatus",
+  "workflow_name": "getOrderStatus",
+  "description": "Read-only order status lookup exposed as an MCP tool.",
+  "risk_level": "low",
+  "approval_required": false,
+  "method": "POST",
+  "required_entities": [
+    "order_id"
+  ],
+  "request_schema": {
+    "type": "object",
+    "required": [
+      "order_id"
+    ],
+    "properties": {
+      "order_id": {
+        "type": "string",
+        "description": "Business order identifier extracted by the agent."
+      }
+    },
+    "additionalProperties": false
+  },
+  "backend_mapping": [
+    {
+      "mcp_field": "order_id",
+      "workflow_field": "orderNumber",
+      "notes": "Map the governed MCP order_id to the backend order lookup key."
+    }
+  ],
+  "response_schema": {
+    "type": "object",
+    "required": [
+      "orderNumber",
+      "status",
+      "estimatedDeliveryDate",
+      "delayRisk",
+      "correlationId"
+    ],
+    "properties": {
+      "orderNumber": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string"
+      },
+      "estimatedDeliveryDate": {
+        "type": "string"
+      },
+      "delayRisk": {
+        "type": "string"
+      },
+      "correlationId": {
+        "type": "string"
+      }
+    }
+  }
+}

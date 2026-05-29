@@ -1,0 +1,17 @@
+{
+  "folders": [
+    {
+      "name": "Enterprise Integration Logic Apps",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "azureLogicAppsStandard.projectRuntime": "~4",
+    "terminal.integrated.env.windows": {
+      "PATH": "C:\\Users\\Agan\\.azurelogicapps\\dependencies\\DotNetSDK;${env:PATH}"
+    },
+    "omnisharp.dotNetCliPaths": [
+      "C:\\Users\\Agan\\.azurelogicapps\\dependencies\\DotNetSDK"
+    ]
+  }
+}
