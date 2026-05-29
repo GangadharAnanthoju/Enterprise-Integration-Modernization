@@ -4,6 +4,8 @@ from dataclasses import dataclass
 
 from approvals.requests import APPROVAL_DECISIONS, APPROVAL_REQUESTS
 from audit.events import AUDIT_EVENTS, AuditEvent
+from config import Settings
+from config_validation import validate_environment
 from foundry.agent_adapter import get_agent_adapter
 from foundry.tracing import audit_event_to_foundry_trace
 from mcp.client import load_mcp_config
@@ -35,7 +37,7 @@ class ReadinessReport:
     checks: list[ReadinessCheck]
 
 
-def run_readiness_checks() -> ReadinessReport:
+def run_readiness_checks(settings: Settings | None = None) -> ReadinessReport:
     """Run local operational readiness checks for the governed agent shell."""
 
     checks = [
@@ -44,8 +46,9 @@ def run_readiness_checks() -> ReadinessReport:
         _check_approval_store(),
         _check_audit_store(),
         _check_observability_projection(),
-        _check_mcp_runtime_config(),
+        _check_mcp_runtime_config(settings),
         _check_agent_runtime_adapter(),
+        _check_environment_validation(settings),
     ]
     report_status = "ready" if all(check.status == "pass" for check in checks) else "needs_attention"
     return ReadinessReport(status=report_status, checks=checks)
@@ -137,8 +140,8 @@ def _check_observability_projection() -> ReadinessCheck:
     )
 
 
-def _check_mcp_runtime_config() -> ReadinessCheck:
-    config = load_mcp_config()
+def _check_mcp_runtime_config(settings: Settings | None = None) -> ReadinessCheck:
+    config = load_mcp_config(settings)
     if config.mode == McpExecutionMode.MOCK and config.server_name:
         return ReadinessCheck(
             name="mcp_runtime_config",
@@ -182,4 +185,21 @@ def _check_agent_runtime_adapter() -> ReadinessCheck:
         name="agent_runtime_adapter",
         status="fail",
         details="Agent runtime adapter metadata is incomplete.",
+    )
+
+
+def _check_environment_validation(settings: Settings | None = None) -> ReadinessCheck:
+    report = validate_environment(settings)
+    if report.status == "ready":
+        return ReadinessCheck(
+            name="environment_validation",
+            status="pass",
+            details="Environment settings are valid for the selected runtime mode.",
+        )
+
+    failed_checks = [check.name for check in report.checks if check.status == "fail"]
+    return ReadinessCheck(
+        name="environment_validation",
+        status="fail",
+        details=f"Environment settings need attention: {', '.join(failed_checks)}.",
     )

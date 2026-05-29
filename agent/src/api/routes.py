@@ -23,6 +23,8 @@ from api.schemas import (
     EvaluationCaseResponse,
     EvaluationExpectedOutcomeResponse,
     EvaluationResultResponse,
+    EnvironmentValidationCheckResponse,
+    EnvironmentValidationReportResponse,
     FoundryTraceResponse,
     McpExecutorDiagnosticsResponse,
     McpServerConfigResponse,
@@ -35,6 +37,11 @@ from api.schemas import (
     ToolSimulationResponse,
 )
 from audit.events import AuditEvent, list_audit_events, record_audit_event
+from config_validation import (
+    EnvironmentCheck,
+    EnvironmentValidationReport,
+    validate_environment,
+)
 from foundry.evaluations import (
     EvaluationCase,
     EvaluationExpectedOutcome,
@@ -184,6 +191,29 @@ def _to_readiness_report_response(report: ReadinessReport) -> ReadinessReportRes
     return ReadinessReportResponse(
         status=report.status,
         checks=[_to_readiness_check_response(check) for check in report.checks],
+    )
+
+
+def _to_environment_check_response(
+    check: EnvironmentCheck,
+) -> EnvironmentValidationCheckResponse:
+    """Convert an internal environment check to the API shape."""
+
+    return EnvironmentValidationCheckResponse(
+        name=check.name,
+        status=check.status,
+        details=check.details,
+    )
+
+
+def _to_environment_report_response(
+    report: EnvironmentValidationReport,
+) -> EnvironmentValidationReportResponse:
+    """Convert an internal environment validation report to the API shape."""
+
+    return EnvironmentValidationReportResponse(
+        status=report.status,
+        checks=[_to_environment_check_response(check) for check in report.checks],
     )
 
 
@@ -583,6 +613,13 @@ async def get_operations_readiness() -> ReadinessReportResponse:
     """Return local operational readiness status."""
 
     return _to_readiness_report_response(run_readiness_checks())
+
+
+@router.get("/operations/environment", response_model=EnvironmentValidationReportResponse)
+async def get_environment_validation() -> EnvironmentValidationReportResponse:
+    """Return environment configuration validation status."""
+
+    return _to_environment_report_response(validate_environment())
 
 
 @router.get("/tools/{tool_name}", response_model=ToolResponse)

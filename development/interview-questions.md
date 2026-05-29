@@ -146,6 +146,26 @@ The tests use `httpx.MockTransport`. That lets us verify request body, headers, 
 
 The config object can carry the API key for the remote client, but public API diagnostics expose only `api_key_configured=true/false`. The key value is not returned from `/mcp/config` or audit responses.
 
+**Q: What does Step 8A add?**
+
+Step 8A defines the Azure environment configuration plan. It keeps mock mode as the default, enables remote MCP only through environment variables, separates MCP settings from Foundry settings, and documents how secrets should move from local `.env` files to Key Vault or platform configuration later.
+
+**Q: Why plan environment configuration before calling Azure?**
+
+Because real backend execution needs controlled configuration, secret handling, diagnostics, and rollback behavior. Planning the environment first prevents hardcoded endpoints and makes remote mode explicit instead of accidental.
+
+**Q: What does Step 8B add?**
+
+Step 8B updates the root `.env.example` so a developer can copy it to a private `.env`. It keeps mock mode as the default, documents the variables needed for remote MCP mode, and includes placeholders for Foundry, observability, Azure identity, and Key Vault.
+
+**Q: What does Step 8C add?**
+
+Step 8C adds environment validation through `/operations/environment`. It checks whether mock mode is safe, whether remote MCP mode has `MCP_SERVER_URL` and `MCP_API_KEY`, and whether Foundry and Application Insights settings are configured. Missing Foundry or App Insights settings are warnings for now, while missing remote MCP settings are failures in remote mode.
+
+**Q: What does Step 8D add?**
+
+Step 8D connects environment validation to `/operations/readiness`. Mock mode can be ready without Azure settings, but remote MCP mode cannot be ready unless endpoint and API-key settings are present.
+
 **Q: What is `PlannedAction`?**
 
 `PlannedAction` is the internal object that packages the selected tool, extracted entities, risk decision, approval requirement, readiness, and missing entities before execution.

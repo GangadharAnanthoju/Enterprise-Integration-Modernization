@@ -461,7 +461,22 @@ def test_operations_readiness_endpoint_returns_ready_report() -> None:
         "observability_projection",
         "mcp_runtime_config",
         "agent_runtime_adapter",
+        "environment_validation",
     }
+
+
+def test_operations_environment_endpoint_returns_validation_report() -> None:
+    response = client.get("/operations/environment")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "ready"
+    checks = {check["name"]: check for check in body["checks"]}
+    assert checks["mcp_mode"]["status"] == "pass"
+    assert checks["remote_mcp_endpoint"]["status"] == "skip"
+    assert checks["remote_mcp_auth"]["status"] == "skip"
+    assert checks["foundry_runtime"]["status"] == "warning"
+    assert checks["appinsights"]["status"] == "warning"
 
 
 def test_agent_chat_selects_invoice_tool_and_generates_correlation_id() -> None:

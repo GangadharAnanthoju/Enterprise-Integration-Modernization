@@ -217,6 +217,21 @@ class ReadinessReportResponse(BaseModel):
     checks: list[ReadinessCheckResponse]
 
 
+class EnvironmentValidationCheckResponse(BaseModel):
+    """Public API shape for one environment validation check."""
+
+    name: str
+    status: str
+    details: str
+
+
+class EnvironmentValidationReportResponse(BaseModel):
+    """Public API shape for environment validation."""
+
+    status: str
+    checks: list[EnvironmentValidationCheckResponse]
+
+
 class AgentChatResponse(BaseModel):
     """Response body for the safe agent chat placeholder."""
 

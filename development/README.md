@@ -51,4 +51,11 @@ The goal is to make the AI project understandable from an Azure Integration Serv
 | 7D | Normalize remote MCP responses | `step7/step-7d-remote-response-normalization.md` |
 | 7E | Add remote MCP error tests | `step7/step-7e-remote-error-tests.md` |
 | 7F | Finish Step 7 with docs and verification | `step7/step-7f-step-7-completion.md` |
+| 8A | Plan Azure environment configuration for remote MCP and Foundry | `step8/step-8a-azure-environment-plan.md` |
+| 8B | Add safe `.env.example` for mock and remote modes | `step8/step-8b-env-example.md` |
+| 8C | Add environment validation checks | `step8/step-8c-environment-validation.md` |
+| 8D | Connect environment validation to readiness checks | `step8/step-8d-remote-readiness-checks.md` |
+| 8E | Document Foundry and observability environment settings | `step8/step-8e-foundry-observability-env-notes.md` |
+| 8F | Finish Step 8 environment foundation | `step8/step-8f-step-8-completion.md` |
+| Azure setup | Environment variable guide for local and Azure settings | `azure-environment-setup.md` |
 | Local setup | Create a root Python virtual environment | `local-python-environment.md` |
