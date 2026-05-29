@@ -42,3 +42,25 @@ class McpServerConfig:
         """Return whether a remote MCP endpoint URL is configured."""
 
         return bool(self.endpoint_url)
+
+
+@dataclass(frozen=True)
+class McpRemoteRequestEnvelope:
+    """Transport envelope for a future remote MCP server call."""
+
+    server_name: str
+    endpoint_url: str
+    tool_name: str
+    correlation_id: str
+    payload: dict[str, Any]
+    timeout_seconds: int
+
+    def to_http_json(self) -> dict[str, Any]:
+        """Return the JSON body expected by the future remote MCP transport."""
+
+        return {
+            "server_name": self.server_name,
+            "tool_name": self.tool_name,
+            "correlation_id": self.correlation_id,
+            "payload": self.payload,
+        }

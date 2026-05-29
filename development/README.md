@@ -39,4 +39,10 @@ The goal is to make the AI project understandable from an Azure Integration Serv
 | 5D | Add MCP runtime configuration for mock and future remote execution | `step5/step-5d-mcp-runtime-config.md` |
 | 5E | Add Foundry agent adapter boundary | `step5/step-5e-foundry-agent-adapter.md` |
 | 5F | Finish Step 5 with readiness checks for MCP config and agent adapter | `step5/step-5f-step-5-readiness-checkpoint.md` |
+| 6A | Add MCP executor boundary for mock and future remote execution | `step6/step-6a-mcp-executor-boundary.md` |
+| 6B | Add remote MCP request envelope | `step6/step-6b-remote-mcp-request-envelope.md` |
+| 6C | Add remote MCP HTTP client placeholder | `step6/step-6c-remote-mcp-http-client-placeholder.md` |
+| 6D | Add remote MCP error handling | `step6/step-6d-remote-mcp-error-handling.md` |
+| 6E | Add MCP execution diagnostics | `step6/step-6e-mcp-execution-diagnostics.md` |
+| 6F | Finish Step 6 with tests and documentation | `step6/step-6f-step-6-completion.md` |
 | Local setup | Create a root Python virtual environment | `local-python-environment.md` |

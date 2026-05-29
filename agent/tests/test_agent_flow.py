@@ -42,6 +42,20 @@ def test_mcp_config_endpoint_returns_safe_runtime_config() -> None:
     }
 
 
+def test_mcp_executor_endpoint_returns_safe_diagnostics() -> None:
+    response = client.get("/mcp/executor")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body == {
+        "mode": "mock",
+        "executor_name": "MockMcpExecutor",
+        "server_name": "logic-apps-standard-mcp",
+        "endpoint_configured": False,
+        "remote_transport": "not_configured",
+    }
+
+
 def test_foundry_agent_adapter_endpoint_returns_active_runtime_boundary() -> None:
     response = client.get("/foundry/agent-adapter")
 
@@ -342,6 +356,7 @@ def test_audit_endpoint_returns_governed_workflow_events() -> None:
     assert body[1]["details"]["approval_id"] == "apr-chat-corr-009"
     assert body[2]["details"]["decision"] == "approved"
     assert body[3]["details"]["tool_name"] == "sendSupplierNotification"
+    assert body[3]["details"]["request_payload"] == {"shipment_id": "SHIP-3007"}
 
 
 def test_audit_endpoint_returns_empty_list_for_unknown_correlation() -> None:

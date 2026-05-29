@@ -70,6 +70,16 @@ class McpServerConfigResponse(BaseModel):
     timeout_seconds: int
 
 
+class McpExecutorDiagnosticsResponse(BaseModel):
+    """Public API shape for active MCP executor diagnostics."""
+
+    mode: str
+    executor_name: str
+    server_name: str
+    endpoint_configured: bool
+    remote_transport: str
+
+
 class AgentAdapterResponse(BaseModel):
     """Public API shape for the active agent runtime adapter."""
 

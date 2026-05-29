@@ -118,6 +118,22 @@ The simulation response now includes the validated `request_payload`, so you can
 
 The MCP layer has a runtime config object with mode, server name, optional endpoint URL, and timeout. It defaults to mock mode today and is ready for a future remote Logic Apps Standard MCP endpoint.
 
+**Q: How did you prepare for real remote MCP execution?**
+
+The MCP client now delegates execution to an executor boundary. `MockMcpExecutor` returns local sample responses today. `RemoteMcpExecutor` is a safe placeholder for future Logic Apps Standard MCP transport and fails clearly instead of pretending remote execution succeeded.
+
+**Q: What did Step 6 add?**
+
+Step 6 added the remote MCP execution structure: executor boundary, remote request envelope, HTTP client placeholder, explicit remote error types, executor diagnostics, and tests. The project still defaults to mock mode, but it now has a clean path for real Logic Apps Standard MCP connectivity.
+
+**Q: Why does remote MCP fail safely right now?**
+
+Because no real remote transport has been implemented yet. The remote executor checks configuration, builds the right envelope, and then raises a clear not-implemented error instead of returning fake success.
+
+**Q: What remote MCP errors are modeled?**
+
+The project models missing configuration, not-yet-implemented transport, timeout, authentication or authorization failure, and backend workflow failure.
+
 **Q: What is `PlannedAction`?**
 
 `PlannedAction` is the internal object that packages the selected tool, extracted entities, risk decision, approval requirement, readiness, and missing entities before execution.

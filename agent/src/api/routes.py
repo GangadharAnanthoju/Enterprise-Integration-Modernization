@@ -24,6 +24,7 @@ from api.schemas import (
     EvaluationExpectedOutcomeResponse,
     EvaluationResultResponse,
     FoundryTraceResponse,
+    McpExecutorDiagnosticsResponse,
     McpServerConfigResponse,
     PlannedActionResponse,
     ReadinessCheckResponse,
@@ -50,6 +51,7 @@ from mcp.client import (
     simulate_mcp_tool,
     simulate_mcp_tool_after_approval,
 )
+from mcp.executors import McpExecutorDiagnostics, get_mcp_executor_diagnostics
 from mcp.schemas import McpServerConfig
 from telemetry.correlation import resolve_correlation_id
 from telemetry.appinsights import AppInsightsCustomEvent, traces_to_appinsights_events
@@ -302,6 +304,20 @@ def _to_mcp_config_response(config: McpServerConfig) -> McpServerConfigResponse:
     )
 
 
+def _to_mcp_executor_diagnostics_response(
+    diagnostics: McpExecutorDiagnostics,
+) -> McpExecutorDiagnosticsResponse:
+    """Convert MCP executor diagnostics to the public API response shape."""
+
+    return McpExecutorDiagnosticsResponse(
+        mode=diagnostics.mode,
+        executor_name=diagnostics.executor_name,
+        server_name=diagnostics.server_name,
+        endpoint_configured=diagnostics.endpoint_configured,
+        remote_transport=diagnostics.remote_transport,
+    )
+
+
 def _to_agent_adapter_response(adapter: AgentRuntimeAdapter) -> AgentAdapterResponse:
     """Convert active agent adapter metadata to the public API response shape."""
 
@@ -370,6 +386,11 @@ def _audit_chat_result(result: AgentChatResult) -> None:
                 "tool_name": result.simulation_result.tool_name,
                 "mode": result.simulation_result.mode,
                 "risk_decision": result.simulation_result.risk_decision,
+                "request_payload": (
+                    result.simulation_result.request.payload
+                    if result.simulation_result.request is not None
+                    else None
+                ),
             },
         )
 
@@ -387,6 +408,15 @@ async def get_mcp_config() -> McpServerConfigResponse:
     """Return safe MCP runtime configuration for diagnostics."""
 
     return _to_mcp_config_response(load_mcp_config())
+
+
+@router.get("/mcp/executor", response_model=McpExecutorDiagnosticsResponse)
+async def get_mcp_executor() -> McpExecutorDiagnosticsResponse:
+    """Return safe diagnostics for the active MCP executor."""
+
+    return _to_mcp_executor_diagnostics_response(
+        get_mcp_executor_diagnostics(load_mcp_config())
+    )
 
 
 @router.get("/foundry/agent-adapter", response_model=AgentAdapterResponse)
@@ -490,6 +520,11 @@ async def execute_approved_action(approval_id: str) -> ApprovalExecutionResponse
             "tool_name": simulation_result.tool_name,
             "risk_decision": simulation_result.risk_decision,
             "mode": simulation_result.mode,
+            "request_payload": (
+                simulation_result.request.payload
+                if simulation_result.request is not None
+                else None
+            ),
         },
     )
     return _to_approval_execution_response(
