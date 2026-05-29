@@ -14,6 +14,8 @@ def test_readiness_checks_pass_for_local_governed_agent() -> None:
         "observability_projection",
         "mcp_runtime_config",
         "agent_runtime_adapter",
+        "foundry_agent_definition",
+        "foundry_tool_registration",
         "environment_validation",
     }
     assert all(check.status == "pass" for check in report.checks)

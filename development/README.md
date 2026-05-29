@@ -73,5 +73,11 @@ The goal is to make the AI project understandable from an Azure Integration Serv
 | 10F | Add queryIntegrationRunStatus local MCP workflow | `step10/step-10f-query-integration-run-status-local-mcp.md` |
 | 10G | Add high-risk local MCP workflows | `step10/step-10g-high-risk-local-mcp-workflows.md` |
 | 10H | Complete local MCP workflow set | `step10/step-10h-complete-local-mcp-workflow-set.md` |
+| 11A | Plan the Foundry agent architecture | `step11/step-11a-foundry-agent-architecture-plan.md` |
+| 11B | Create Foundry agent instructions | `step11/step-11b-foundry-agent-instructions.md` |
+| 11C | Add Foundry agent configuration skeleton | `step11/step-11c-foundry-agent-config.md` |
+| 11D | Add Foundry tool registration metadata | `step11/step-11d-foundry-tool-registration-metadata.md` |
+| 11E | Connect Foundry artifacts to readiness checks | `step11/step-11e-foundry-readiness-integration.md` |
+| 11F | Finish Step 11 Foundry preparation | `step11/step-11f-step-11-completion.md` |
 | Azure setup | Environment variable guide for local and Azure settings | `azure-environment-setup.md` |
 | Local setup | Create a root Python virtual environment | `local-python-environment.md` |

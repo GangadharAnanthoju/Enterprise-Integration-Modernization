@@ -6,8 +6,10 @@ from approvals.requests import APPROVAL_DECISIONS, APPROVAL_REQUESTS
 from audit.events import AUDIT_EVENTS, AuditEvent
 from config import Settings
 from config_validation import validate_environment
+from foundry.agent_definition import validate_foundry_agent_definition
 from foundry.agent_adapter import get_agent_adapter
 from foundry.tracing import audit_event_to_foundry_trace
+from foundry.tool_registration import validate_foundry_tool_registrations
 from mcp.client import load_mcp_config
 from mcp.schemas import McpExecutionMode
 from tools.registry import list_tools
@@ -48,6 +50,8 @@ def run_readiness_checks(settings: Settings | None = None) -> ReadinessReport:
         _check_observability_projection(),
         _check_mcp_runtime_config(settings),
         _check_agent_runtime_adapter(),
+        _check_foundry_agent_definition(),
+        _check_foundry_tool_registration(),
         _check_environment_validation(settings),
     ]
     report_status = "ready" if all(check.status == "pass" for check in checks) else "needs_attention"
@@ -185,6 +189,38 @@ def _check_agent_runtime_adapter() -> ReadinessCheck:
         name="agent_runtime_adapter",
         status="fail",
         details="Agent runtime adapter metadata is incomplete.",
+    )
+
+
+def _check_foundry_agent_definition() -> ReadinessCheck:
+    missing = validate_foundry_agent_definition()
+    if not missing:
+        return ReadinessCheck(
+            name="foundry_agent_definition",
+            status="pass",
+            details="Local Foundry agent definition skeleton is complete.",
+        )
+
+    return ReadinessCheck(
+        name="foundry_agent_definition",
+        status="fail",
+        details=f"Foundry agent definition needs attention: {'; '.join(missing)}.",
+    )
+
+
+def _check_foundry_tool_registration() -> ReadinessCheck:
+    missing = validate_foundry_tool_registrations()
+    if not missing:
+        return ReadinessCheck(
+            name="foundry_tool_registration",
+            status="pass",
+            details="Foundry-facing tool registration metadata is complete.",
+        )
+
+    return ReadinessCheck(
+        name="foundry_tool_registration",
+        status="fail",
+        details=f"Foundry tool registration metadata needs attention: {'; '.join(missing)}.",
     )
 
 

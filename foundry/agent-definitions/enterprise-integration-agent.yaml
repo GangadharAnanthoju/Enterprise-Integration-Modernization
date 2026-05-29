@@ -1,2 +1,74 @@
 name: enterprise-integration-agent
-description: Governed enterprise integration assistant using MCP tools.
+displayName: Enterprise Integration Modernization Agent
+description: Governed enterprise integration assistant using approved MCP tools and Logic Apps workflow endpoints.
+version: 0.1.0
+status: local_design_skeleton
+
+runtime:
+  target: microsoft_foundry
+  currentImplementation: local_rule_based_adapter
+  adapter: agent/src/foundry/agent_adapter.py
+  apiBoundary: FastAPI /agent/chat
+
+instructions:
+  source: agent/src/prompts/foundry_agent_instructions.md
+  purpose: Defines approved-tool behavior, missing-entity handling, approval rules, MCP-only execution, and response style.
+
+tooling:
+  executionBoundary: MCP
+  backendImplementation: Logic Apps Standard workflows
+  endpointResolution: Per-tool endpoint environment variables with MCP_SERVER_URL fallback
+  approvedTools:
+    - name: getOrderStatus
+      risk: Low
+      requiredEntities:
+        - order_id
+    - name: checkShipmentStatus
+      risk: Low
+      requiredEntities:
+        - shipment_id
+    - name: validateInvoice
+      risk: Medium
+      requiredEntities:
+        - invoice_id
+    - name: queryIntegrationRunStatus
+      risk: Low
+      requiredEntities:
+        - correlation_id
+    - name: createApprovalRequest
+      risk: Medium
+      requiredEntities: []
+    - name: sendSupplierNotification
+      risk: High
+      approvalRequired: true
+      requiredEntities:
+        - shipment_id
+    - name: createServiceNowTicket
+      risk: High
+      approvalRequired: true
+      requiredEntities: []
+
+governance:
+  toolRegistrySource: agent/src/tools/registry.py
+  riskPolicySource: agent/src/tools/risk_policy.py
+  approvalBoundary: agent/src/approvals/requests.py
+  auditBoundary: agent/src/audit/events.py
+  highRiskExecutionRule: High-risk tools must execute only after an approved approval request.
+
+evaluation:
+  localSuite: agent/src/foundry/evaluations.py
+  requiredBehaviors:
+    - Select the correct approved tool for supported integration requests.
+    - Ask for missing required entities instead of guessing.
+    - Block high-risk execution from direct chat.
+    - Preserve correlation IDs in planning, execution, and response.
+    - Return clarification for unsupported requests.
+
+operations:
+  readinessChecks: agent/src/foundry/governance.py
+  tracingShape: agent/src/foundry/tracing.py
+  appInsightsProjection: agent/src/telemetry/appinsights.py
+
+notes:
+  - This file is a local Step 11C design skeleton, not a deployed Foundry resource export.
+  - Future steps can convert this metadata into the exact Foundry registration format after the Foundry project and agent runtime are selected.

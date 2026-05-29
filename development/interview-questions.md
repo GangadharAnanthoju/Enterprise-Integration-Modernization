@@ -1,366 +1,257 @@
 # Enterprise Integration Modernization: Interview Questions
 
-## Project Pitch
+## Project Overview
 
 **Q: How would you explain this project in one minute?**
 
-This project is an enterprise integration modernization prototype. It shows how an AI agent can safely interact with backend enterprise workflows through approved MCP tools. FastAPI exposes the agent and tool APIs, a controlled tool catalog defines what actions are allowed, risk policy decides whether execution can proceed, and the MCP boundary simulates backend workflow calls. The design keeps Microsoft Foundry first-class for future runtime governance, tracing, evaluations, and operational readiness.
+I built an enterprise integration modernization prototype where an AI agent can safely interact with backend workflows through approved MCP tools. The agent does not call systems directly. It selects a governed tool, validates required business entities, applies risk policy, uses approval gates for high-risk actions, and executes through Logic Apps workflows using a consistent MCP envelope. The design is aligned to Microsoft Foundry for future agent runtime, evaluations, tracing, and operations.
 
-**Q: What business problem does this solve?**
+**Q: What problem does this solve?**
 
-Enterprise users often need to check orders, validate invoices, track shipments, create tickets, or trigger workflows across many systems. This project creates a governed agent pattern where natural-language requests can be mapped to approved integration actions without letting the agent invent tools or bypass policy.
+Enterprise users often need to check orders, validate invoices, track shipments, troubleshoot integration runs, or trigger operational workflows across multiple systems. This project creates a controlled pattern where natural-language requests can become approved integration actions without letting the agent invent tools or bypass enterprise policy.
 
-**Q: What makes this an enterprise architecture instead of a simple chatbot?**
+**Q: What makes this more than a chatbot?**
 
-The agent does not directly execute arbitrary code. It must select from an approved tool catalog, extract required business entities, pass risk policy, use correlation IDs, and route execution through the MCP boundary. That creates auditability, control, and operational separation.
+The agent is not just generating text. It is part of a governed integration flow. It uses an approved tool catalog, required-entity validation, risk decisions, approval workflows, audit events, correlation IDs, and a dedicated MCP execution boundary before any backend action can happen.
 
-## Architecture
+**Q: How would you describe the architecture at a high level?**
 
-**Q: What are the main layers?**
+The main layers are FastAPI, agent orchestration, tool governance, risk policy, approval handling, MCP execution, Logic Apps workflows, and Foundry-oriented operations. FastAPI exposes the API, the agent plans the action, the registry controls available tools, risk policy decides whether approval is needed, and Logic Apps executes the enterprise workflow through MCP-style HTTP envelopes.
 
-1. FastAPI API layer.
-2. Agent orchestration layer.
-3. Governance and risk policy layer.
-4. Approved MCP tool catalog.
-5. MCP execution boundary.
-6. Backend enterprise systems.
-7. Foundry governance, evaluation, and operations layer.
+## Agent Architecture
 
-**Q: Why did you separate planning from execution?**
+**Q: What is the agent responsible for?**
 
-Planning decides what the agent wants to do. Execution actually touches backend workflows. Separating them allows approval gates, validation, audit logging, and human review before business-impacting actions happen.
-
-**Q: Why use MCP as the execution path?**
-
-MCP gives the enterprise a stable boundary for backend actions. Instead of the agent directly calling ERP, ServiceNow, or Logic Apps internals, it calls approved tools with known contracts. That makes tool governance easier.
-
-**Q: Where does FastAPI fit?**
-
-FastAPI is the service interface. It exposes `/agent/chat`, `/tools`, `/tools/{tool_name}/risk`, and `/tools/{tool_name}/simulate`. It maps HTTP requests into internal agent and tool models.
-
-**Q: Where does Microsoft Foundry fit?**
-
-Foundry is planned as the agent runtime and governance layer. In this project, Foundry-specific modules are isolated so runtime, tracing, evaluations, and operational controls can be added without rewriting the API, MCP adapter, or tool policy.
-
-**Q: How can the temporary rule-based agent be replaced later?**
-
-FastAPI calls an agent runtime adapter instead of calling the rule-based planner directly. Today the adapter delegates to the local learning implementation. Later, the same adapter boundary can delegate to a Microsoft Foundry / Agent Framework runtime while keeping `/agent/chat` stable.
-
-## Agent Behavior
-
-**Q: What happens when a user says `Check order ORD-1001`?**
-
-The agent detects the order intent, selects `getOrderStatus`, extracts `order_id=ORD-1001`, checks that the required entity is present, evaluates risk as `allow`, and returns a planned action. If `simulate_when_ready=true`, it runs mock MCP simulation.
-
-**Q: What happens when a user says `Check order status`?**
-
-The agent selects `getOrderStatus`, but it cannot extract an order ID. The planned action returns `ready_for_simulation=false` and `missing_entities=["order_id"]`.
-
-**Q: What happens for high-risk tools?**
-
-High-risk tools return `risk_decision=require_approval`. If required entities are present and `simulate_when_ready=true`, the chat endpoint stops with `status=approval_required`, does not simulate execution, and returns a pending `approval_request`.
-
-**Q: Why does `/agent/chat` require `simulate_when_ready=true`?**
-
-This keeps execution explicit. By default, chat plans only. Simulation runs only when the caller opts in and the request passes readiness and risk gates.
-
-**Q: Why create an approval request instead of just returning an error?**
-
-A high-risk action is not necessarily invalid. It may be valid but needs human review. Returning a structured approval request preserves the requested tool, entities, reason, correlation ID, and pending status so the workflow can continue safely.
-
-**Q: What happens after an approval request is created?**
-
-A reviewer can call the approval decision API to mark it `approved` or `rejected`. This records the business decision without executing the backend action yet. Execution is intentionally a later governed step.
-
-**Q: How does an approved high-risk action execute?**
-
-The execution endpoint checks that the approval request exists, has a recorded decision, and was approved. Only then does it run the original high-risk MCP simulation through an explicit approved-execution path. The normal direct simulation path still blocks high-risk tools.
-
-**Q: How do you prove what happened later?**
-
-The audit endpoint returns ordered events by correlation ID. It records the plan, approval request, approval decision, and approved execution, which makes the workflow explainable for operations and governance.
-
-**Q: How does this connect to Foundry or Application Insights later?**
-
-The project maps audit events into Foundry-style trace spans and Application Insights-style custom event envelopes. The shared correlation ID becomes the operation ID, so agent planning, approval, and MCP execution can be viewed as one traceable workflow.
-
-**Q: How do you evaluate whether the agent is safe?**
-
-The local evaluation suite checks behavior-focused cases: correct tool selection, missing entity blocking, high-risk approval gating, and unsupported intent clarification. These cases are designed to become Microsoft Foundry evaluation dataset rows later.
-
-**Q: What does operational readiness mean in this project?**
-
-Readiness means the governed execution path is available: approved tool catalog, high-risk risk policy, approval store, audit store, observability projection, MCP runtime configuration, and agent runtime adapter. The `/operations/readiness` endpoint summarizes those checks.
-
-**Q: How did you finish Step 5?**
-
-Step 5 was finished by adding readiness checks for the new runtime boundaries: MCP runtime configuration and the active agent adapter. That proves the contract-driven MCP request path and Foundry adapter boundary are visible in operational diagnostics.
-
-## Classes And Contracts
-
-**Q: What is `ToolContract`?**
-
-`ToolContract` is the metadata model for one approved MCP tool. It includes the tool name, business domain, backend system, risk level, owner, version, operational impact, required business entities, and schema references.
-
-**Q: Why move required entities into the tool contract?**
-
-Required entities are part of the governed tool definition. Moving them into `ToolContract` makes the catalog the source of truth for what each MCP action needs before execution.
-
-**Q: How do extracted entities become backend requests?**
-
-The MCP request builder validates extracted entities against `ToolContract.required_entities` and creates a `McpToolRequest` with a correlation ID and payload. Missing required entities raise a clear error instead of creating an incomplete backend request.
-
-**Q: How do you know the mock execution used the right entity values?**
-
-The simulation response now includes the validated `request_payload`, so you can see exactly which MCP payload would have been sent to the backend workflow.
-
-**Q: How is the MCP runtime configured?**
-
-The MCP layer has a runtime config object with mode, server name, optional endpoint URL, and timeout. It defaults to mock mode today and is ready for a future remote Logic Apps Standard MCP endpoint.
-
-**Q: How did you prepare for real remote MCP execution?**
-
-The MCP client now delegates execution to an executor boundary. `MockMcpExecutor` returns local sample responses today. `RemoteMcpExecutor` is a safe placeholder for future Logic Apps Standard MCP transport and fails clearly instead of pretending remote execution succeeded.
-
-**Q: What did Step 6 add?**
-
-Step 6 added the remote MCP execution structure: executor boundary, remote request envelope, HTTP client placeholder, explicit remote error types, executor diagnostics, and tests. The project still defaults to mock mode, but it now has a clean path for real Logic Apps Standard MCP connectivity.
-
-**Q: Why does remote MCP fail safely right now?**
-
-Because no real remote transport has been implemented yet. The remote executor checks configuration, builds the right envelope, and then raises a clear not-implemented error instead of returning fake success.
-
-**Q: What remote MCP errors are modeled?**
-
-The project models missing configuration, not-yet-implemented transport, timeout, authentication or authorization failure, and backend workflow failure.
-
-**Q: What did Step 7 add?**
-
-Step 7 turned the remote MCP placeholder into a tested HTTP client path. It uses `httpx`, sends the governed MCP envelope as JSON, includes correlation/tool headers, supports bearer API-key auth, normalizes JSON responses, and maps remote failures into specific exceptions.
-
-**Q: How do you test remote MCP without a real endpoint?**
-
-The tests use `httpx.MockTransport`. That lets us verify request body, headers, response normalization, auth failures, and timeout handling without making network calls.
-
-**Q: How do you avoid leaking MCP secrets?**
-
-The config object can carry the API key for the remote client, but public API diagnostics expose only `api_key_configured=true/false`. The key value is not returned from `/mcp/config` or audit responses.
-
-**Q: What does Step 8A add?**
-
-Step 8A defines the Azure environment configuration plan. It keeps mock mode as the default, enables remote MCP only through environment variables, separates MCP settings from Foundry settings, and documents how secrets should move from local `.env` files to Key Vault or platform configuration later.
-
-**Q: Why plan environment configuration before calling Azure?**
-
-Because real backend execution needs controlled configuration, secret handling, diagnostics, and rollback behavior. Planning the environment first prevents hardcoded endpoints and makes remote mode explicit instead of accidental.
-
-**Q: What does Step 8B add?**
-
-Step 8B updates the root `.env.example` so a developer can copy it to a private `.env`. It keeps mock mode as the default, documents the variables needed for remote MCP mode, and includes placeholders for Foundry, observability, Azure identity, and Key Vault.
-
-**Q: What does Step 8C add?**
-
-Step 8C adds environment validation through `/operations/environment`. It checks whether mock mode is safe, whether remote MCP mode has `MCP_SERVER_URL` and `MCP_API_KEY`, and whether Foundry and Application Insights settings are configured. Missing Foundry or App Insights settings are warnings for now, while missing remote MCP settings are failures in remote mode.
-
-**Q: What does Step 8D add?**
-
-Step 8D connects environment validation to `/operations/readiness`. Mock mode can be ready without Azure settings, but remote MCP mode cannot be ready unless endpoint and API-key settings are present.
-
-**Q: When do you start creating Logic Apps and exposing them as MCP?**
-
-That starts in Step 9. Steps 6 and 7 prepared the remote MCP client path, and Step 8 prepared the environment and validation foundation. Step 9 is the right point to create the first Logic Apps workflow, expose it as an MCP tool, and connect it to the tested remote execution path.
-
-**Q: Why not create Logic Apps earlier?**
-
-Because the project needed the enterprise safety layers first: approved tool contracts, risk policy, approval gates, audit, observability, remote client, and environment validation. That way, when a real Logic Apps MCP endpoint is added, it plugs into a governed path instead of becoming an uncontrolled direct backend call.
-
-**Q: What does Step 9B add?**
-
-Step 9B defines the first Logic Apps MCP workflow contract for `getOrderStatus`. It documents the POST request, required `order_id`, low-risk policy, sample response, and backend mapping from the governed MCP payload to the backend order lookup key.
-
-**Q: Why start Logic Apps MCP with `getOrderStatus`?**
-
-It is low risk and read-only, so it is the safest first workflow for proving real MCP connectivity. Once the pattern works for lookup, the same contract-first approach can be applied to invoice, shipment, and eventually high-risk approval-gated tools.
-
-**Q: What does Step 9C add?**
-
-Step 9C turns the local `getOrderStatus` workflow from an empty placeholder into an HTTP-triggered Logic Apps workflow definition. It validates `order_id`, returns a sample order-status response when valid, and returns a 400 response when the required entity is missing.
-
-**Q: Why add a separate Logic Apps Standard project folder?**
-
-The full repository is not shaped like a Logic Apps Standard workspace. Step 9D adds `logicapps/standard-app` so the Logic Apps designer can be opened against that folder separately, while the rest of the repo remains organized for the agent, tests, docs, and infrastructure.
-
-**Q: What does Step 9E add?**
-
-Step 9E adds a dedicated VS Code workspace file for the Logic Apps Standard project, a sample request for `getOrderStatus`, and local designer instructions. This lets the workflow be opened separately in VS Code without turning the repository root into the Logic Apps workspace.
-
-**Q: Where is the Logic Apps designer resource group configured?**
-
-For local designer work, it is configured in `logicapps/standard-app/local.settings.json` under `WORKFLOWS_RESOURCE_GROUP_NAME`. The current resource group is `rg-sysint-enterprise-integration-eus`. The committed template is `local.settings.json.example`; the real `local.settings.json` stays ignored.
-
-**Q: What does Step 9G add?**
-
-Step 9G documents how to run or prepare the local `getOrderStatus` Logic Apps workflow, send the sample request, and use the generated local HTTP trigger URL as `MCP_SERVER_URL` for the agent's remote MCP client.
-
-**Q: What does Step 9H add?**
-
-Step 9H completes the local Logic Apps workflow set. Every approved MCP tool now has a Logic Apps contract, sample request, workflow definition, and designer-project copy under `logicapps/standard-app`.
-
-**Q: What does Step 10A add?**
-
-Step 10A adds the Azure deployment review checkpoint. It identifies the existing resource group, proposed Logic Apps Standard app, low-cost workflow plan, required storage account, and resources to defer until later. No Azure resources are created in this step.
-
-**Q: Why review Azure resources before writing deployment code?**
-
-Enterprise deployments need name, cost, region, and scope review before provisioning. Step 10A separates the minimum required Logic Apps Standard resources from optional platform resources like Application Insights, Key Vault, API Management, Service Bus, and Function Apps.
-
-**Q: Which Azure resources are required first for Logic Apps Standard?**
-
-The first deployment needs the existing resource group, a Logic Apps Standard app, a Workflow Standard App Service plan, and a storage account. Observability, secrets, API gateway, and async messaging resources can be added later when the workflow endpoint is proven.
-
-**Q: What does Step 10B add?**
-
-Step 10B connects the agent's remote MCP HTTP client to a local Logic Apps Standard workflow. The `getOrderStatus` workflow now accepts the governed MCP envelope, reads `payload.order_id`, and returns the normalized remote MCP response shape.
-
-**Q: Why use local Logic Apps before Azure deployment?**
-
-It proves the same transport and workflow contract without paying for a hosted `WS1` Logic Apps Standard plan. The team can validate the agent, MCP envelope, correlation ID, and workflow response locally, then deploy later only when the path is ready.
-
-**Q: What is the limitation of the first local Logic Apps bridge?**
-
-The current config has one `MCP_SERVER_URL`, so the first bridge points to one workflow endpoint, starting with `getOrderStatus`. Later the project can add a dispatcher workflow, per-tool endpoint mapping, or a dedicated MCP facade.
-
-**Q: What does Step 10C add?**
-
-Step 10C adds per-tool Logic Apps endpoint mapping. The agent can select `getOrderStatus`, `checkShipmentStatus`, or another approved tool, and the MCP executor can resolve that tool to its own configured Logic Apps callback URL.
-
-**Q: Why use per-tool endpoints instead of a dispatcher?**
-
-Per-tool endpoints better match the project goal that each Logic Apps workflow becomes an MCP tool. Each tool keeps its own contract, risk level, backend mapping, and owner, while the agent still uses the governed tool registry to decide what can run.
-
-**Q: What does Step 10D add?**
-
-Step 10D converts `checkShipmentStatus` into a local Logic Apps MCP workflow. It accepts the governed MCP envelope, validates `tool_name=checkShipmentStatus` and `payload.shipment_id`, then returns a normalized remote MCP response.
-
-**Q: Why is adding a second local Logic Apps workflow important?**
-
-The first workflow proved the transport. The second workflow proves the architecture can scale by tool: each approved MCP tool can map to its own Logic Apps workflow endpoint instead of relying on one hardcoded URL.
-
-**Q: What does Step 10E add?**
-
-Step 10E converts `validateInvoice` into a local Logic Apps MCP workflow. It validates `tool_name=validateInvoice` and `payload.invoice_id`, then returns a normalized invoice validation result.
-
-**Q: What does having three low-risk workflows prove?**
-
-It proves the pattern is repeatable across business domains. The same agent planning, risk policy, MCP envelope, per-tool endpoint mapping, and Logic Apps response normalization work for orders, shipments, and invoices.
-
-**Q: What does Step 10F add?**
-
-Step 10F converts `queryIntegrationRunStatus` into a local Logic Apps MCP workflow. It validates `tool_name=queryIntegrationRunStatus` and `payload.correlation_id`, then returns a normalized integration run-status result.
-
-**Q: Why include an integration run-status workflow?**
-
-It shows that the agent can help both business users and support teams. The same governed MCP path can support operational troubleshooting without giving the agent direct backend access.
-
-**Q: What does Step 10G add?**
-
-Step 10G converts `sendSupplierNotification` and `createServiceNowTicket` into local Logic Apps MCP workflows. Both accept the governed MCP envelope and return normalized remote MCP responses.
-
-**Q: How are high-risk Logic Apps workflows controlled?**
-
-The workflows can run as backend endpoints, but the agent chat path does not call them directly. High-risk requests create approval requests first, and execution happens only through the approved-action path after a reviewer approves the request.
-
-**Q: What does Step 10H complete?**
-
-Step 10H completes the local Logic Apps MCP workflow set. All approved tools now have local workflow definitions that accept the same governed MCP envelope and return the same normalized response pattern.
-
-**Q: What is the Step 10 architecture outcome?**
-
-The agent can plan an approved tool, build a governed MCP envelope, choose a per-tool Logic Apps endpoint, call the local workflow over HTTP, and normalize the result. High-risk tools remain blocked by approval policy unless executed through the approved path.
-
-**Q: What is `PlannedAction`?**
-
-`PlannedAction` is the internal object that packages the selected tool, extracted entities, risk decision, approval requirement, readiness, and missing entities before execution.
-
-**Q: What is `RiskDecision`?**
-
-`RiskDecision` is the policy result that says whether the selected tool is allowed to run or requires human approval.
-
-**Q: What is `McpSimulationResult`?**
-
-`McpSimulationResult` is the result returned by the mock MCP execution boundary. It includes tool name, correlation ID, mode, status, risk decision, approval requirement, result payload, and message.
-
-## Governance And Safety
+The agent is responsible for understanding the user's request, selecting an approved tool, extracting required business entities, asking for missing information, and explaining the planned action. It should not directly execute backend logic or bypass policy.
 
 **Q: How do you prevent the agent from inventing tools?**
 
-Tool selection is constrained to the static approved registry. If a selected tool is not in the catalog, the request is treated as unsupported.
+Tool selection is constrained to a static approved registry. If the request does not match an approved tool, the agent returns a clarification response instead of creating a new tool name or making an arbitrary backend call.
 
-**Q: How do you handle auditability?**
+**Q: Why did you separate planning from execution?**
 
-Every response can carry a correlation ID. Risk decisions include audit requirements, and tool metadata includes owner, backend system, risk level, and operational impact.
+Planning decides what the agent wants to do. Execution touches backend workflows. Separating them allows validation, risk checks, approval gates, audit logging, and operational controls before any business-impacting action happens.
 
-**Q: Why are some tools high risk?**
+**Q: How would you replace the current local rule-based agent with a real Foundry agent?**
 
-High-risk tools can create external or operational business impact, such as sending supplier notifications or creating ServiceNow tickets. Those require approval before execution.
+FastAPI already calls an agent adapter instead of directly depending on the local planner. The local adapter can later be replaced with a Foundry agent adapter that returns the same structured plan: selected tool, extracted entities, missing entities, and risk-aware execution decision. That keeps the public API stable while changing the runtime.
 
-**Q: Why are read-only tools still governed?**
+**Q: What instructions would you give the Foundry agent?**
 
-Read-only actions can still expose sensitive operational or business data. They may be allowed automatically, but they should still be auditable.
+I would instruct it to use only approved tools, never invent tool names, ask for missing entities, preserve correlation IDs, explain its reasoning briefly, and never execute high-risk tools without approval. It should treat MCP as the only enterprise execution path.
 
-## Testing
+**Q: Why write agent instructions before creating the Foundry agent?**
 
-**Q: What did you test?**
+The instructions are the behavior contract for the agent. They define tool limits, missing-entity behavior, approval rules, response style, and MCP execution boundaries. Once those are clear, creating the Foundry agent and attaching tools becomes much less ambiguous.
 
-The tests cover health checks, tool catalog APIs, risk APIs, mock simulation, correlation IDs, chat intent detection, entity extraction, planned actions, missing required entities, and gated chat-triggered simulation.
+**Q: What is the purpose of the Foundry agent configuration skeleton?**
 
-**Q: What is a strong test case from this project?**
+It captures the intended Foundry agent metadata before live registration: agent name, instruction file, current local adapter, MCP execution boundary, Logic Apps backend, approved tool placeholders, governance source files, and evaluation expectations. It is not a deployed Foundry resource yet; it is the bridge between the local implementation and future Foundry registration.
 
-One strong test verifies that a high-risk tool with required entities still does not simulate from chat. That proves readiness alone is not enough; policy must also allow execution.
+**Q: How would you prepare tool registration for Foundry without duplicating governance?**
 
-**Q: What did the latest verification show?**
+I would project the existing approved tool registry into Foundry-facing registration metadata. That way tool name, description, owner, risk level, approval requirement, required entities, schemas, and endpoint settings all come from the governed catalog instead of being copied into a second list that can drift.
 
-The latest test run passed 36 tests. The only warnings were pytest cache write warnings due local `.pytest_cache` access.
+**Q: How do you know the Foundry preparation is still valid as the project changes?**
 
-## Design Choices
+I added readiness checks for the local Foundry agent definition and tool registration metadata. They verify that the instruction file exists, the agent definition still points to MCP and Logic Apps, all approved tools are represented, and high-risk metadata still requires approval.
 
-**Q: Why start with mock simulation instead of real Azure calls?**
+**Q: How do you prevent prompt or instruction drift from bypassing governance?**
 
-Mock simulation lets us prove the architecture, contracts, risk gates, and tests before connecting to real enterprise systems. It lowers risk while preserving the target design.
+The instructions are only one layer of defense. The actual enforcement still lives in code: the approved tool registry, required-entity validation, risk policy, approval checks, MCP request builder, and executor boundary. Even if an agent response is imperfect, the backend should still block unsupported tools, missing entities, and high-risk execution without approval.
+
+## MCP And Tool Governance
+
+**Q: Why use MCP as the backend execution boundary?**
+
+MCP gives the agent a stable and governed way to interact with enterprise actions. Instead of calling ERP, ServiceNow, or Logic Apps internals directly, the agent calls approved tools with known contracts, risk levels, owners, and required entities.
+
+**Q: What is in a tool contract?**
+
+Each tool contract includes the tool name, description, business domain, backend system, risk level, approval requirement, owner, version, operational impact, required entities, and schema references.
+
+**Q: How do required entities work?**
+
+Required entities are defined in the tool contract. Before execution, the MCP request builder checks that those values were extracted from the user request. If something like `order_id`, `shipment_id`, or `invoice_id` is missing, execution is blocked and the response tells the caller what is needed.
+
+**Q: How does the MCP envelope look?**
+
+The Logic Apps workflows accept a common envelope:
+
+```json
+{
+  "server_name": "logic-apps-standard-mcp",
+  "tool_name": "getOrderStatus",
+  "correlation_id": "abc-123",
+  "payload": {
+    "order_id": "ORD-1001"
+  },
+  "timeout_seconds": 30
+}
+```
+
+This makes every backend workflow receive a predictable request shape.
+
+**Q: How are tool endpoints configured?**
+
+The project supports per-tool endpoint settings such as `MCP_TOOL_ENDPOINT_GET_ORDER_STATUS` and `MCP_TOOL_ENDPOINT_CHECK_SHIPMENT_STATUS`. The MCP executor selects the endpoint based on the chosen tool, with `MCP_SERVER_URL` available as a fallback.
+
+## Logic Apps Integration
+
+**Q: Why did you use Logic Apps for the backend workflows?**
+
+Logic Apps is a strong fit for enterprise integration because it can orchestrate connectors, APIs, approvals, and system workflows. In this project, each Logic Apps workflow represents an approved backend action exposed through the MCP boundary.
+
+**Q: Are the Logic Apps workflows acting as MCP tools?**
+
+Yes, in the local implementation each workflow acts as a tool endpoint. The agent selects a tool from the registry, and the MCP executor calls that workflow's configured HTTP trigger URL using the common MCP envelope.
+
+**Q: Why use local Logic Apps instead of deploying immediately to Azure?**
+
+Local Logic Apps lets us prove the contract, workflow behavior, correlation IDs, and agent-to-MCP execution path without paying for a hosted Logic Apps Standard plan. Once the local flow is stable, the same pattern can move to Azure.
+
+**Q: What workflows are currently modeled?**
+
+The project includes order status, shipment status, invoice validation, integration run-status lookup, supplier notification, ServiceNow ticket creation, and approval request creation.
+
+**Q: How do you handle local Logic Apps authentication?**
+
+Local callback URLs include a `sig` query-string token. For that local path, `MCP_API_KEY` stays empty so the remote MCP client does not send an extra bearer token that the local Logic Apps runtime may reject.
+
+## Risk And Approval
+
+**Q: How do you decide whether a tool can execute directly?**
+
+Each tool has a risk level. Low and medium-risk read-only or validation workflows can execute when required entities are present. High-risk tools, such as supplier notifications and ServiceNow ticket creation, require approval.
+
+**Q: What happens when a user asks for a high-risk action?**
+
+The agent can plan the action and extract entities, but it does not execute the tool directly. It returns `approval_required` and creates a pending approval request. The backend workflow can run only through the approved execution path.
+
+**Q: Why not let the agent decide approval by itself?**
+
+Approval is a business control, not a model preference. High-risk actions may affect suppliers, tickets, operations, or external communications, so a human or policy-controlled approval step is required before execution.
+
+**Q: How does approved execution work?**
+
+The system checks that an approval request exists, that a reviewer approved it, and that the requested tool is valid. Only then does it call the MCP execution path for the high-risk tool.
+
+## Foundry And Evaluation
+
+**Q: Where does Microsoft Foundry fit in this architecture?**
+
+Foundry is the future agent runtime and governance plane. It can host or orchestrate the agent, store/version instructions, attach tools, run evaluations, capture traces, and support operational readiness.
 
 **Q: Why keep Foundry code isolated?**
 
-SDKs and runtime details can evolve. Isolating Foundry-specific code protects the core API, MCP adapter, and governance model from churn.
+SDKs and runtime patterns can evolve. By isolating Foundry-specific code behind an adapter boundary, the FastAPI routes, MCP layer, risk policy, and Logic Apps workflows remain stable even when the agent runtime changes.
 
-**Q: Why use explicit schemas?**
+**Q: What would you evaluate before releasing the agent?**
 
-Explicit request and response schemas make the API predictable for future front ends, tests, integrations, and documentation.
+I would evaluate tool selection accuracy, missing-entity handling, high-risk approval gating, unsupported request behavior, correlation ID propagation, and response consistency. These local evaluation cases can later become Foundry evaluation datasets.
+
+**Q: What should be traced in Foundry?**
+
+At minimum: user request received, selected tool, extracted entities, risk decision, approval request or decision, MCP call, Logic Apps response, and final agent response. The shared correlation ID should connect these events.
+
+## Observability And Operations
+
+**Q: How do you make the workflow auditable?**
+
+The project records audit events with correlation IDs. It can project those audit events into Foundry-style traces and Application Insights-style custom events, which makes planning, approval, and execution reviewable.
+
+**Q: What operational readiness checks are useful?**
+
+Useful checks include tool registry availability, risk policy availability, approval store availability, MCP runtime mode, endpoint configuration, Foundry settings, and observability settings.
+
+**Q: What would you monitor in production?**
+
+I would monitor failed tool calls, missing entity rates, approval-required rates, approval rejections, Logic Apps failures, timeout rates, tool latency, high-risk execution counts, and correlation IDs for support investigations.
+
+**Q: How do you avoid leaking secrets?**
+
+Secrets are not returned from diagnostics. The API only exposes whether an API key is configured, not the value. In Azure, secrets should move to Key Vault, managed identity, APIM policies, or platform configuration.
+
+## Testing
+
+**Q: What kinds of tests does the project include?**
+
+The tests cover tool registry contracts, risk decisions, entity validation, MCP request building, remote HTTP client behavior, response normalization, approval gating, audit behavior, environment validation, Logic Apps contract shape, and agent flow behavior.
+
+**Q: What is an important safety test?**
+
+One important test verifies that a high-risk tool with all required entities still does not execute directly from chat. That proves readiness is not enough; risk policy must allow execution or require approval.
+
+**Q: How do you test remote MCP without a live endpoint?**
+
+The Python tests use `httpx.MockTransport` to simulate remote HTTP responses, authentication failures, timeouts, and backend errors without making real network calls.
+
+**Q: How did you test the local Logic Apps bridge?**
+
+I ran the Logic Apps Standard project locally, fetched each workflow callback URL, posted MCP envelopes directly to the workflows, and verified that the agent could call low-risk workflows through the remote MCP path. For high-risk workflows, I verified direct backend calls work but chat still requires approval.
+
+## Azure Deployment
+
+**Q: Why not deploy to Azure immediately?**
+
+Logic Apps Standard on a workflow plan can incur cost even with low traffic. For this learning project, local execution proves the architecture first. Azure deployment should happen after resource names, cost, monitoring, and security are reviewed.
+
+**Q: What would be required for Azure deployment?**
+
+For Logic Apps Standard, the minimum deployment needs a resource group, Logic App Standard app, Workflow Standard plan, and storage account. Optional production resources include Application Insights, Log Analytics, Key Vault, APIM, and Service Bus.
+
+**Q: How would this change in Azure?**
+
+The workflow endpoints would become Azure-hosted URLs, secrets would move out of local settings, monitoring would use Azure services, and tool registration could be connected to Foundry, APIM, or an MCP-compatible server layer.
+
+**Q: Would you use APIM?**
+
+For production, APIM can be useful for policy enforcement, subscription keys, OAuth, throttling, logging, and a cleaner enterprise API boundary in front of Logic Apps. It is not required for the local proof of concept.
+
+## Design Tradeoffs
+
+**Q: Why start with a local rule-based agent instead of a real LLM agent?**
+
+It makes the governance path transparent and testable first. Once the contracts, risk policy, approval gates, and MCP execution path are stable, the rule-based planner can be replaced with a Foundry-hosted agent.
+
+**Q: Why use FastAPI if Foundry will host the agent later?**
+
+FastAPI is the enterprise API boundary for clients, diagnostics, readiness, approvals, and integration with other services. Foundry can become the agent runtime behind that boundary without forcing callers to change.
+
+**Q: If you use a Foundry Agent and chatbot UI, why keep FastAPI?**
+
+FastAPI remains the enterprise control plane. The chatbot can send user requests to FastAPI, FastAPI can call the Foundry Agent for reasoning, and backend execution still goes through governed MCP tools and Logic Apps. This keeps API contracts, approvals, audit events, readiness checks, diagnostics, and secret handling outside the chatbot.
+
+The pattern is:
+
+```text
+Chatbot UI
+  -> FastAPI control plane
+    -> Foundry Agent
+      -> MCP tools
+        -> Logic Apps workflows
+```
+
+For a small demo, the chatbot could call Foundry directly. For enterprise integration, FastAPI is stronger because final enforcement remains in backend code: unsupported tools are blocked, missing entities are rejected, high-risk actions require approval, and Logic Apps callback URLs or API keys are never exposed to the UI.
+
+**Q: Why not let Logic Apps own all governance?**
+
+Logic Apps is strong for workflow execution, but agent governance also needs tool selection controls, entity validation, risk decisions, approval state, audit events, and evaluation hooks before the workflow is called.
+
+**Q: What would you improve next?**
+
+I would decide the real Foundry project and model deployment, create the actual Foundry agent, attach the MCP tool layer, add persistent approval/audit storage, and then plan Azure deployment.
 
 ## Resume Answers
 
 **Q: How would you describe this project on a resume?**
 
-Built an enterprise integration modernization prototype using FastAPI, governed MCP tool contracts, risk-based execution policy, correlation-aware mock execution, and an agent planning layer designed for Microsoft Foundry governance, evaluations, and operations.
+Built an enterprise integration modernization prototype using FastAPI, Microsoft Foundry-oriented agent architecture, governed MCP tool contracts, Logic Apps workflow endpoints, risk-based approval controls, correlation-aware audit events, and tested remote MCP execution.
 
 **Q: What technical skills does this demonstrate?**
 
-FastAPI, Python, API design, agent orchestration, MCP tool governance, enterprise integration patterns, risk-based execution control, test-driven development, and Azure-aligned architecture.
+Python, FastAPI, agent architecture, MCP-style tool execution, Azure Logic Apps Standard, enterprise integration patterns, risk governance, approval workflows, testing, environment validation, and Azure-ready design.
 
 **Q: What architecture skills does this demonstrate?**
 
-Separation of concerns, contract-first tool design, policy-driven execution, auditability, controlled backend access, and phased modernization from mock simulation toward real cloud integrations.
-
-## Possible Follow-Up Improvements
-
-**Q: What would you build next?**
-
-1. Add an approval request flow for high-risk actions.
-2. Add real MCP server integration backed by Logic Apps Standard.
-3. Connect the Foundry adapter to a real Microsoft Agent Framework runtime.
-4. Add a front end for chat, tool catalog, risk decisions, and simulation results.
-5. Add role-based access control for who can run or approve tools.
-6. Add persistent audit logs for planned actions and executions.
-
-**Q: What production concerns remain?**
-
-Authentication, authorization, secret management, real MCP connectivity, telemetry export, approval workflow persistence, rate limiting, input validation hardening, and deployment pipelines.
+Separation of planning and execution, contract-first integration design, policy-driven tool execution, backend abstraction, auditability, operational readiness, and phased migration from local proof of concept to Azure deployment.

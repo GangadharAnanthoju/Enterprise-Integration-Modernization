@@ -461,6 +461,8 @@ def test_operations_readiness_endpoint_returns_ready_report() -> None:
         "observability_projection",
         "mcp_runtime_config",
         "agent_runtime_adapter",
+        "foundry_agent_definition",
+        "foundry_tool_registration",
         "environment_validation",
     }
 
