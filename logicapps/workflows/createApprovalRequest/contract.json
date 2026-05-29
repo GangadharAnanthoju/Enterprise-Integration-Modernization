@@ -1,0 +1,24 @@
+{
+  "tool_name": "createApprovalRequest",
+  "workflow_name": "createApprovalRequest",
+  "description": "Create a human approval request for governed workflow execution.",
+  "risk_level": "medium",
+  "approval_required": false,
+  "method": "POST",
+  "required_entities": [],
+  "request_schema": {
+    "type": "object",
+    "properties": {
+      "toolName": {
+        "type": "string"
+      },
+      "riskLevel": {
+        "type": "string"
+      },
+      "requestedBy": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": true
+  }
+}

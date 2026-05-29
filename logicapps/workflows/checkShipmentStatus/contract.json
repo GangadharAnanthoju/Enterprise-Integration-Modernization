@@ -1,0 +1,23 @@
+{
+  "tool_name": "checkShipmentStatus",
+  "workflow_name": "checkShipmentStatus",
+  "description": "Read-only shipment status lookup exposed as an MCP tool.",
+  "risk_level": "low",
+  "approval_required": false,
+  "method": "POST",
+  "required_entities": [
+    "shipment_id"
+  ],
+  "request_schema": {
+    "type": "object",
+    "required": [
+      "shipment_id"
+    ],
+    "properties": {
+      "shipment_id": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  }
+}

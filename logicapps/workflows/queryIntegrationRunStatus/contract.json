@@ -1,0 +1,23 @@
+{
+  "tool_name": "queryIntegrationRunStatus",
+  "workflow_name": "queryIntegrationRunStatus",
+  "description": "Read-only integration run status lookup exposed as an MCP tool.",
+  "risk_level": "low",
+  "approval_required": false,
+  "method": "POST",
+  "required_entities": [
+    "correlation_id"
+  ],
+  "request_schema": {
+    "type": "object",
+    "required": [
+      "correlation_id"
+    ],
+    "properties": {
+      "correlation_id": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  }
+}

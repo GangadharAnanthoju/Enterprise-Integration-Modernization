@@ -44,7 +44,13 @@ WORKFLOWS_LOCATION_NAME=eastus
 
 | Workflow | Purpose |
 |---|---|
+| `checkShipmentStatus` | Read-only shipment status lookup. |
+| `createApprovalRequest` | Human approval request creation. |
+| `createServiceNowTicket` | Approval-gated ServiceNow ticket creation. |
 | `getOrderStatus` | Read-only order status lookup exposed as the first MCP-backed workflow candidate. |
+| `queryIntegrationRunStatus` | Read-only integration troubleshooting lookup. |
+| `sendSupplierNotification` | Approval-gated supplier notification. |
+| `validateInvoice` | Invoice validation before payment processing. |
 
 ## Local Files
 
@@ -69,3 +75,45 @@ For local execution, the Logic Apps Standard extension may also require:
 - A copied `local.settings.json`
 
 Designer inspection can usually happen before the workflow is deployed to Azure. Running the workflow locally may require those runtime tools.
+
+## Local Run Checklist
+
+1. Start Azurite if your local settings use `UseDevelopmentStorage=true`.
+2. Open a terminal in:
+
+   ```text
+   C:\Data_AI\projects\Enterprise-Integration-Modernization\logicapps\standard-app
+   ```
+
+3. Make sure local settings exist:
+
+   ```powershell
+   Copy-Item local.settings.json.example local.settings.json
+   ```
+
+4. Start the local Logic Apps runtime from the VS Code extension or with Azure Functions Core Tools if available:
+
+   ```powershell
+   func start
+   ```
+
+5. Use the generated local HTTP trigger URL for `getOrderStatus`.
+
+The sample request body is:
+
+```json
+{
+  "order_id": "ORD-1001"
+}
+```
+
+Once the local endpoint is known, it can be used in the agent `.env`:
+
+```env
+MOCK_MCP=false
+MCP_EXECUTION_MODE=remote
+MCP_SERVER_URL=http://localhost:7071/api/<generated-getOrderStatus-route>
+MCP_API_KEY=local-dev-key
+```
+
+The exact local URL may vary depending on how the Logic Apps extension starts the workflow runtime.

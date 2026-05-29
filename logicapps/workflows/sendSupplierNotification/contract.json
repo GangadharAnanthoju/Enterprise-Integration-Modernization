@@ -1,0 +1,23 @@
+{
+  "tool_name": "sendSupplierNotification",
+  "workflow_name": "sendSupplierNotification",
+  "description": "Approval-gated supplier notification workflow exposed as an MCP tool.",
+  "risk_level": "high",
+  "approval_required": true,
+  "method": "POST",
+  "required_entities": [
+    "shipment_id"
+  ],
+  "request_schema": {
+    "type": "object",
+    "required": [
+      "shipment_id"
+    ],
+    "properties": {
+      "shipment_id": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  }
+}

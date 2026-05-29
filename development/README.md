@@ -63,5 +63,7 @@ The goal is to make the AI project understandable from an Azure Integration Serv
 | 9D | Add Logic Apps Standard project structure for designer work | `step9/step-9d-logic-apps-standard-project.md` |
 | 9E | Add Logic Apps designer workspace and local setup notes | `step9/step-9e-logic-apps-designer-workspace.md` |
 | 9F | Configure Logic Apps local resource group setting | `step9/step-9f-logic-apps-local-resource-group.md` |
+| 9G | Add local Logic App run instructions | `step9/step-9g-local-logic-app-run-instructions.md` |
+| 9H | Complete local Logic Apps workflow set | `step9/step-9h-complete-local-workflow-set.md` |
 | Azure setup | Environment variable guide for local and Azure settings | `azure-environment-setup.md` |
 | Local setup | Create a root Python virtual environment | `local-python-environment.md` |

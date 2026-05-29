@@ -1,0 +1,21 @@
+{
+  "tool_name": "createServiceNowTicket",
+  "workflow_name": "createServiceNowTicket",
+  "description": "Approval-gated ServiceNow ticket creation workflow exposed as an MCP tool.",
+  "risk_level": "high",
+  "approval_required": true,
+  "method": "POST",
+  "required_entities": [],
+  "request_schema": {
+    "type": "object",
+    "properties": {
+      "shortDescription": {
+        "type": "string"
+      },
+      "assignmentGroup": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": true
+  }
+}

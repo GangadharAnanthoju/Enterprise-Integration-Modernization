@@ -198,6 +198,14 @@ Step 9E adds a dedicated VS Code workspace file for the Logic Apps Standard proj
 
 For local designer work, it is configured in `logicapps/standard-app/local.settings.json` under `WORKFLOWS_RESOURCE_GROUP_NAME`. The current resource group is `rg-sysint-enterprise-integration-eus`. The committed template is `local.settings.json.example`; the real `local.settings.json` stays ignored.
 
+**Q: What does Step 9G add?**
+
+Step 9G documents how to run or prepare the local `getOrderStatus` Logic Apps workflow, send the sample request, and use the generated local HTTP trigger URL as `MCP_SERVER_URL` for the agent's remote MCP client.
+
+**Q: What does Step 9H add?**
+
+Step 9H completes the local Logic Apps workflow set. Every approved MCP tool now has a Logic Apps contract, sample request, workflow definition, and designer-project copy under `logicapps/standard-app`.
+
 **Q: What is `PlannedAction`?**
 
 `PlannedAction` is the internal object that packages the selected tool, extracted entities, risk decision, approval requirement, readiness, and missing entities before execution.
