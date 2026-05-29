@@ -57,15 +57,18 @@ def test_all_logic_app_sample_requests_contain_required_entities() -> None:
         sample_path = REPO_ROOT / f"logicapps/workflows/{tool.name}/sample-request.json"
         sample_request = json.loads(sample_path.read_text(encoding="utf-8"))
 
+        assert sample_request["tool_name"] == tool.name
+        assert isinstance(sample_request["payload"], dict)
         for required_entity in tool.required_entities:
-            assert required_entity in sample_request
+            assert required_entity in sample_request["payload"]
 
 
 def test_get_order_status_sample_request_matches_required_entities() -> None:
     sample_path = REPO_ROOT / "logicapps/workflows/getOrderStatus/sample-request.json"
     sample_request = json.loads(sample_path.read_text(encoding="utf-8"))
 
-    assert sample_request == {"order_id": "ORD-1001"}
+    assert sample_request["tool_name"] == "getOrderStatus"
+    assert sample_request["payload"] == {"order_id": "ORD-1001"}
 
 
 def test_get_order_status_workflow_has_local_logic_app_design() -> None:
@@ -74,18 +77,23 @@ def test_get_order_status_workflow_has_local_logic_app_design() -> None:
 
     definition = workflow["definition"]
     trigger = definition["triggers"]["When_an_HTTP_request_is_received"]
-    validation_action = definition["actions"]["Validate_order_id"]
+    validation_action = definition["actions"]["Validate_mcp_envelope"]
     success_actions = validation_action["actions"]
     failure_actions = validation_action["else"]["actions"]
 
     assert workflow["kind"] == "Stateful"
     assert trigger["type"] == "Request"
     assert trigger["kind"] == "Http"
-    assert trigger["inputs"]["schema"]["required"] == ["order_id"]
+    assert trigger["inputs"]["schema"]["required"] == [
+        "server_name",
+        "tool_name",
+        "correlation_id",
+        "payload",
+    ]
     assert validation_action["type"] == "If"
-    assert "Compose_order_status_response" in success_actions
-    assert success_actions["Return_order_status"]["inputs"]["statusCode"] == 200
-    assert failure_actions["Return_missing_order_id"]["inputs"]["statusCode"] == 400
+    assert "Compose_order_status_result" in success_actions
+    assert success_actions["Return_mcp_order_status"]["inputs"]["statusCode"] == 200
+    assert failure_actions["Return_invalid_mcp_request"]["inputs"]["statusCode"] == 400
 
 
 def test_logic_apps_standard_project_copy_matches_get_order_status_workflow() -> None:
@@ -145,4 +153,5 @@ def test_logic_apps_standard_workspace_and_sample_request_are_valid() -> None:
             "path": ".",
         }
     ]
-    assert sample_request == {"order_id": "ORD-1001"}
+    assert sample_request["tool_name"] == "getOrderStatus"
+    assert sample_request["payload"] == {"order_id": "ORD-1001"}

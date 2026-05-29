@@ -10,6 +10,16 @@ from mcp.exceptions import MissingRequiredEntitiesError
 from mcp.executors import get_mcp_executor
 from mcp.schemas import McpExecutionMode, McpServerConfig, McpToolRequest
 
+TOOL_ENDPOINT_SETTING_NAMES: dict[str, str] = {
+    "getOrderStatus": "mcp_tool_endpoint_get_order_status",
+    "checkShipmentStatus": "mcp_tool_endpoint_check_shipment_status",
+    "validateInvoice": "mcp_tool_endpoint_validate_invoice",
+    "queryIntegrationRunStatus": "mcp_tool_endpoint_query_integration_run_status",
+    "createApprovalRequest": "mcp_tool_endpoint_create_approval_request",
+    "createServiceNowTicket": "mcp_tool_endpoint_create_servicenow_ticket",
+    "sendSupplierNotification": "mcp_tool_endpoint_send_supplier_notification",
+}
+
 
 # **************** TEMPORARY MOCK MCP ADAPTER ****************
 # This module is active now for local simulation. After the real enterprise MCP
@@ -69,7 +79,20 @@ def load_mcp_config(settings: Settings | None = None) -> McpServerConfig:
         endpoint_url=resolved_settings.mcp_server_url,
         timeout_seconds=resolved_settings.mcp_timeout_seconds,
         api_key=resolved_settings.mcp_api_key,
+        tool_endpoints=_load_tool_endpoints(resolved_settings),
     )
+
+
+def _load_tool_endpoints(settings: Settings) -> dict[str, str]:
+    """Load optional per-tool remote endpoints from environment settings."""
+
+    endpoints: dict[str, str] = {}
+    for tool_name, setting_name in TOOL_ENDPOINT_SETTING_NAMES.items():
+        endpoint_url = getattr(settings, setting_name)
+        if endpoint_url:
+            endpoints[tool_name] = endpoint_url
+
+    return endpoints
 
 
 def simulate_mcp_tool(

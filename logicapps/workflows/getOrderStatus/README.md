@@ -20,21 +20,32 @@ The agent sends a governed MCP payload:
 
 ```json
 {
-  "order_id": "ORD-1001"
+  "server_name": "logic-apps-standard-mcp",
+  "tool_name": "getOrderStatus",
+  "correlation_id": "local-corr-001",
+  "payload": {
+    "order_id": "ORD-1001"
+  },
+  "timeout_seconds": 30
 }
 ```
 
-The Logic Apps workflow can map `order_id` to the backend order lookup key.
+The Logic Apps workflow maps `payload.order_id` to the backend order lookup key.
 
 ## Response
 
 ```json
 {
-  "orderNumber": "4500098123",
-  "status": "In Transit",
-  "estimatedDeliveryDate": "2026-05-21",
-  "delayRisk": "Medium",
-  "correlationId": "abc-123"
+  "status": "completed",
+  "result": {
+    "orderNumber": "4500098123",
+    "requestedOrderId": "ORD-1001",
+    "status": "In Transit",
+    "estimatedDeliveryDate": "2026-05-21",
+    "delayRisk": "Medium",
+    "correlationId": "local-corr-001"
+  },
+  "message": "Remote MCP execution completed by local Logic Apps workflow."
 }
 ```
 
@@ -47,11 +58,11 @@ This workflow is planned as a read-only lookup. In a real implementation it can 
 The local `workflow.json` is now configured with:
 
 1. HTTP request trigger.
-2. Request body schema requiring `order_id`.
-3. `Validate_order_id` condition.
-4. `Compose_order_status_response` action.
-5. `Return_order_status` HTTP 200 response.
-6. `Return_missing_order_id` HTTP 400 response.
+2. Request body schema requiring the governed MCP envelope.
+3. `Validate_mcp_envelope` condition.
+4. `Compose_order_status_result` action.
+5. `Return_mcp_order_status` HTTP 200 response.
+6. `Return_invalid_mcp_request` HTTP 400 response.
 
 This lets the workflow be inspected locally as an actual Logic Apps workflow design instead of an empty placeholder.
 

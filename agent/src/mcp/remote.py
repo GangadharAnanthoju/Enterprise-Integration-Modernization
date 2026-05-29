@@ -20,12 +20,13 @@ def build_remote_request_envelope(
 ) -> McpRemoteRequestEnvelope:
     """Build the HTTP-ready envelope for a future remote MCP request."""
 
-    if not config.endpoint_configured:
+    endpoint_url = config.endpoint_for_tool(request.tool_name)
+    if not endpoint_url:
         raise RemoteMcpConfigurationError(config.server_name)
 
     return McpRemoteRequestEnvelope(
         server_name=config.server_name,
-        endpoint_url=config.endpoint_url or "",
+        endpoint_url=endpoint_url,
         tool_name=request.tool_name,
         correlation_id=request.correlation_id,
         payload=request.payload,

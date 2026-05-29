@@ -37,18 +37,27 @@ class McpServerConfig:
     endpoint_url: str | None
     timeout_seconds: int
     api_key: str | None = None
+    tool_endpoints: dict[str, str] | None = None
 
     @property
     def endpoint_configured(self) -> bool:
-        """Return whether a remote MCP endpoint URL is configured."""
+        """Return whether any remote MCP endpoint URL is configured."""
 
-        return bool(self.endpoint_url)
+        return bool(self.endpoint_url or self.tool_endpoints)
 
     @property
     def api_key_configured(self) -> bool:
         """Return whether an API key is configured without exposing the secret."""
 
         return bool(self.api_key)
+
+    def endpoint_for_tool(self, tool_name: str) -> str | None:
+        """Return the remote endpoint configured for one tool, or the fallback."""
+
+        if self.tool_endpoints and tool_name in self.tool_endpoints:
+            return self.tool_endpoints[tool_name]
+
+        return self.endpoint_url
 
 
 @dataclass(frozen=True)

@@ -19,6 +19,9 @@ env/
 # IDE
 .vscode/
 .idea/
+!logicapps/standard-app/.vscode/
+!logicapps/standard-app/.vscode/launch.json
+!logicapps/standard-app/.vscode/tasks.json
 
 # Local learning notes
 development/
@@ -28,6 +31,10 @@ development/
 *.log
 logicapps/standard-app/local.settings.json
 logicapps/standard-app/workflow-designtime/
+logicapps/standard-app/AzuriteConfig
+logicapps/standard-app/__azurite_db_*__.json
+logicapps/standard-app/__blobstorage__/
+logicapps/standard-app/__queuestorage__/
 
 # OS
 Thumbs.db

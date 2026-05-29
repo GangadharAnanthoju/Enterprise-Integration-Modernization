@@ -1,5 +1,12 @@
 {
-  "toolName": "sendSupplierNotification",
-  "riskLevel": "High",
-  "requestedBy": "demo-user"
+  "server_name": "logic-apps-standard-mcp",
+  "tool_name": "createApprovalRequest",
+  "correlation_id": "local-corr-approval-001",
+  "payload": {
+    "toolName": "sendSupplierNotification",
+    "riskLevel": "High",
+    "requestedBy": "demo-user",
+    "businessJustification": "Supplier notification is required for delayed shipment handling."
+  },
+  "timeout_seconds": 30
 }

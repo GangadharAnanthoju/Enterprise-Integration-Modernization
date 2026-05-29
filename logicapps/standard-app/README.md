@@ -79,31 +79,44 @@ Designer inspection can usually happen before the workflow is deployed to Azure.
 ## Local Run Checklist
 
 1. Start Azurite if your local settings use `UseDevelopmentStorage=true`.
-2. Open a terminal in:
+2. Press F5 in this workspace and choose `Start local Logic Apps host`.
+3. If F5 does not start the host, run the task manually from Command Palette:
+
+   ```text
+   Tasks: Run Task -> func: host start
+   ```
+
+4. Or open a terminal in:
 
    ```text
    C:\Data_AI\projects\Enterprise-Integration-Modernization\logicapps\standard-app
    ```
 
-3. Make sure local settings exist:
+5. Make sure local settings exist:
 
    ```powershell
    Copy-Item local.settings.json.example local.settings.json
    ```
 
-4. Start the local Logic Apps runtime from the VS Code extension or with Azure Functions Core Tools if available:
+6. Start the local Logic Apps runtime from the VS Code extension or with Azure Functions Core Tools if available:
 
    ```powershell
    func start
    ```
 
-5. Use the generated local HTTP trigger URL for `getOrderStatus`.
+7. Use the generated local HTTP trigger URL for `getOrderStatus`.
 
 The sample request body is:
 
 ```json
 {
-  "order_id": "ORD-1001"
+  "server_name": "logic-apps-standard-mcp",
+  "tool_name": "getOrderStatus",
+  "correlation_id": "local-corr-001",
+  "payload": {
+    "order_id": "ORD-1001"
+  },
+  "timeout_seconds": 30
 }
 ```
 
@@ -112,8 +125,16 @@ Once the local endpoint is known, it can be used in the agent `.env`:
 ```env
 MOCK_MCP=false
 MCP_EXECUTION_MODE=remote
-MCP_SERVER_URL=http://localhost:7071/api/<generated-getOrderStatus-route>
-MCP_API_KEY=local-dev-key
+MCP_TOOL_ENDPOINT_GET_ORDER_STATUS=http://localhost:7071/api/<generated-getOrderStatus-route>
+MCP_TOOL_ENDPOINT_CHECK_SHIPMENT_STATUS=http://localhost:7071/api/<generated-checkShipmentStatus-route>
+MCP_TOOL_ENDPOINT_VALIDATE_INVOICE=http://localhost:7071/api/<generated-validateInvoice-route>
+MCP_TOOL_ENDPOINT_QUERY_INTEGRATION_RUN_STATUS=http://localhost:7071/api/<generated-queryIntegrationRunStatus-route>
+MCP_TOOL_ENDPOINT_SEND_SUPPLIER_NOTIFICATION=http://localhost:7071/api/<generated-sendSupplierNotification-route>
+MCP_TOOL_ENDPOINT_CREATE_SERVICENOW_TICKET=http://localhost:7071/api/<generated-createServiceNowTicket-route>
+MCP_TOOL_ENDPOINT_CREATE_APPROVAL_REQUEST=http://localhost:7071/api/<generated-createApprovalRequest-route>
+MCP_API_KEY=
 ```
 
 The exact local URL may vary depending on how the Logic Apps extension starts the workflow runtime.
+
+For local Logic Apps callback URLs, keep `MCP_API_KEY` empty because the URL already includes its own `sig` token.

@@ -10,44 +10,122 @@
           "schema": {
             "type": "object",
             "required": [
-              "shipment_id"
+              "server_name",
+              "tool_name",
+              "correlation_id",
+              "payload"
             ],
             "properties": {
-              "shipment_id": {
+              "server_name": {
                 "type": "string"
+              },
+              "tool_name": {
+                "type": "string"
+              },
+              "correlation_id": {
+                "type": "string"
+              },
+              "payload": {
+                "type": "object",
+                "required": [
+                  "shipment_id"
+                ],
+                "properties": {
+                  "shipment_id": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "timeout_seconds": {
+                "type": "integer"
               }
             },
-            "additionalProperties": false
+            "additionalProperties": true
           }
         }
       }
     },
     "actions": {
-      "Compose_supplier_notification_response": {
-        "type": "Compose",
-        "inputs": {
-          "notificationId": "NOTIF-1001",
-          "requestedShipmentId": "@triggerBody()?['shipment_id']",
-          "status": "Sent",
-          "correlationId": "@coalesce(triggerOutputs()?['headers']?['x-correlation-id'], workflow()?['run']?['name'])"
+      "Validate_mcp_envelope": {
+        "type": "If",
+        "expression": {
+          "and": [
+            {
+              "equals": [
+                "@triggerBody()?['tool_name']",
+                "sendSupplierNotification"
+              ]
+            },
+            {
+              "not": {
+                "equals": [
+                  "@triggerBody()?['payload']?['shipment_id']",
+                  null
+                ]
+              }
+            },
+            {
+              "not": {
+                "equals": [
+                  "@triggerBody()?['payload']?['shipment_id']",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        "actions": {
+          "Compose_supplier_notification_result": {
+            "type": "Compose",
+            "inputs": {
+              "notificationId": "NOTIF-1001",
+              "requestedShipmentId": "@triggerBody()?['payload']?['shipment_id']",
+              "status": "Sent",
+              "correlationId": "@coalesce(triggerBody()?['correlation_id'], triggerOutputs()?['headers']?['x-correlation-id'], workflow()?['run']?['name'])"
+            }
+          },
+          "Return_mcp_supplier_notification": {
+            "type": "Response",
+            "kind": "Http",
+            "inputs": {
+              "statusCode": 200,
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "status": "completed",
+                "result": "@outputs('Compose_supplier_notification_result')",
+                "message": "Remote MCP execution completed by local Logic Apps workflow."
+              }
+            },
+            "runAfter": {
+              "Compose_supplier_notification_result": [
+                "Succeeded"
+              ]
+            }
+          }
+        },
+        "else": {
+          "actions": {
+            "Return_invalid_mcp_request": {
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 400,
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "status": "failed",
+                  "error": "invalid_mcp_request",
+                  "message": "The sendSupplierNotification workflow requires tool_name=sendSupplierNotification and payload.shipment_id."
+                }
+              }
+            }
+          }
         },
         "runAfter": {}
-      },
-      "Return_supplier_notification": {
-        "type": "Response",
-        "kind": "Http",
-        "inputs": {
-          "statusCode": 200,
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": "@outputs('Compose_supplier_notification_response')"
-        },
-        "runAfter": {
-          "Compose_supplier_notification_response": [
-            "Succeeded"
-          ]
-        }
       }
     },
     "outputs": {}

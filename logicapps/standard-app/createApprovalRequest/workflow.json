@@ -9,15 +9,42 @@
         "inputs": {
           "schema": {
             "type": "object",
+            "required": [
+              "server_name",
+              "tool_name",
+              "correlation_id",
+              "payload"
+            ],
             "properties": {
-              "toolName": {
+              "server_name": {
                 "type": "string"
               },
-              "riskLevel": {
+              "tool_name": {
                 "type": "string"
               },
-              "requestedBy": {
+              "correlation_id": {
                 "type": "string"
+              },
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "toolName": {
+                    "type": "string"
+                  },
+                  "riskLevel": {
+                    "type": "string"
+                  },
+                  "requestedBy": {
+                    "type": "string"
+                  },
+                  "businessJustification": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "timeout_seconds": {
+                "type": "integer"
               }
             },
             "additionalProperties": true
@@ -26,31 +53,68 @@
       }
     },
     "actions": {
-      "Compose_approval_request_response": {
-        "type": "Compose",
-        "inputs": {
-          "approvalId": "APR-1001",
-          "status": "Pending",
-          "requestedTool": "@triggerBody()?['toolName']",
-          "correlationId": "@coalesce(triggerOutputs()?['headers']?['x-correlation-id'], workflow()?['run']?['name'])"
+      "Validate_mcp_envelope": {
+        "type": "If",
+        "expression": {
+          "equals": [
+            "@triggerBody()?['tool_name']",
+            "createApprovalRequest"
+          ]
+        },
+        "actions": {
+          "Compose_approval_request_result": {
+            "type": "Compose",
+            "inputs": {
+              "approvalId": "APR-1001",
+              "status": "Pending",
+              "requestedTool": "@coalesce(triggerBody()?['payload']?['toolName'], 'unspecified')",
+              "riskLevel": "@coalesce(triggerBody()?['payload']?['riskLevel'], 'High')",
+              "requestedBy": "@coalesce(triggerBody()?['payload']?['requestedBy'], 'demo-user')",
+              "businessJustification": "@coalesce(triggerBody()?['payload']?['businessJustification'], 'Approval requested by governed MCP workflow.')",
+              "correlationId": "@coalesce(triggerBody()?['correlation_id'], triggerOutputs()?['headers']?['x-correlation-id'], workflow()?['run']?['name'])"
+            }
+          },
+          "Return_mcp_approval_request": {
+            "type": "Response",
+            "kind": "Http",
+            "inputs": {
+              "statusCode": 200,
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "status": "completed",
+                "result": "@outputs('Compose_approval_request_result')",
+                "message": "Remote MCP execution completed by local Logic Apps workflow."
+              }
+            },
+            "runAfter": {
+              "Compose_approval_request_result": [
+                "Succeeded"
+              ]
+            }
+          }
+        },
+        "else": {
+          "actions": {
+            "Return_invalid_mcp_request": {
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 400,
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "status": "failed",
+                  "error": "invalid_mcp_request",
+                  "message": "The createApprovalRequest workflow requires tool_name=createApprovalRequest."
+                }
+              }
+            }
+          }
         },
         "runAfter": {}
-      },
-      "Return_approval_request": {
-        "type": "Response",
-        "kind": "Http",
-        "inputs": {
-          "statusCode": 200,
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": "@outputs('Compose_approval_request_response')"
-        },
-        "runAfter": {
-          "Compose_approval_request_response": [
-            "Succeeded"
-          ]
-        }
       }
     },
     "outputs": {}

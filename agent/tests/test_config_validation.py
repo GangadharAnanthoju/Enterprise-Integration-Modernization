@@ -49,7 +49,10 @@ def test_validate_environment_fails_for_remote_mode_without_endpoint_or_key() ->
     checks = {check.name: check for check in report.checks}
     assert report.status == "needs_attention"
     assert checks["remote_mcp_endpoint"].status == "fail"
-    assert checks["remote_mcp_endpoint"].details == "Remote MCP mode requires MCP_SERVER_URL."
+    assert (
+        checks["remote_mcp_endpoint"].details
+        == "Remote MCP mode requires MCP_SERVER_URL or at least one per-tool endpoint."
+    )
     assert checks["remote_mcp_auth"].status == "fail"
     assert checks["remote_mcp_auth"].details == "Remote MCP mode requires MCP_API_KEY."
 
@@ -60,3 +63,19 @@ def test_validate_environment_fails_for_inconsistent_mcp_mode() -> None:
     checks = {check.name: check for check in report.checks}
     assert report.status == "needs_attention"
     assert checks["mcp_mode"].status == "fail"
+
+
+def test_validate_environment_allows_local_logic_app_tool_endpoint_without_api_key() -> None:
+    report = validate_environment(
+        Settings(
+            mock_mcp=False,
+            mcp_execution_mode="remote",
+            mcp_tool_endpoint_get_order_status="http://localhost:7071/api/getOrderStatus",
+            mcp_api_key=None,
+        )
+    )
+
+    checks = {check.name: check for check in report.checks}
+    assert report.status == "ready"
+    assert checks["remote_mcp_endpoint"].status == "pass"
+    assert checks["remote_mcp_auth"].status == "warning"

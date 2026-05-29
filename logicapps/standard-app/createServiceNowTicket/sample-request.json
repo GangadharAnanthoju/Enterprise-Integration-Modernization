@@ -1,4 +1,10 @@
 {
-  "shortDescription": "Shipment delay detected",
-  "assignmentGroup": "Integration Support"
+  "server_name": "logic-apps-standard-mcp",
+  "tool_name": "createServiceNowTicket",
+  "correlation_id": "local-corr-ticket-001",
+  "payload": {
+    "shortDescription": "Shipment delay detected",
+    "assignmentGroup": "Integration Support"
+  },
+  "timeout_seconds": 30
 }

@@ -65,5 +65,13 @@ The goal is to make the AI project understandable from an Azure Integration Serv
 | 9F | Configure Logic Apps local resource group setting | `step9/step-9f-logic-apps-local-resource-group.md` |
 | 9G | Add local Logic App run instructions | `step9/step-9g-local-logic-app-run-instructions.md` |
 | 9H | Complete local Logic Apps workflow set | `step9/step-9h-complete-local-workflow-set.md` |
+| 10A | Review Azure resources before Logic Apps deployment | `step10/step-10a-azure-resource-review.md` |
+| 10B | Connect remote MCP mode to local Logic Apps | `step10/step-10b-local-logic-apps-remote-mcp.md` |
+| 10C | Add per-tool Logic Apps endpoint mapping | `step10/step-10c-per-tool-logic-app-endpoints.md` |
+| 10D | Add checkShipmentStatus local MCP workflow | `step10/step-10d-check-shipment-status-local-mcp.md` |
+| 10E | Add validateInvoice local MCP workflow | `step10/step-10e-validate-invoice-local-mcp.md` |
+| 10F | Add queryIntegrationRunStatus local MCP workflow | `step10/step-10f-query-integration-run-status-local-mcp.md` |
+| 10G | Add high-risk local MCP workflows | `step10/step-10g-high-risk-local-mcp-workflows.md` |
+| 10H | Complete local MCP workflow set | `step10/step-10h-complete-local-mcp-workflow-set.md` |
 | Azure setup | Environment variable guide for local and Azure settings | `azure-environment-setup.md` |
 | Local setup | Create a root Python virtual environment | `local-python-environment.md` |

@@ -11,6 +11,13 @@ class Settings(BaseSettings):
     mcp_execution_mode: str = "mock"
     mcp_server_name: str = "logic-apps-standard-mcp"
     mcp_server_url: str | None = None
+    mcp_tool_endpoint_get_order_status: str | None = None
+    mcp_tool_endpoint_check_shipment_status: str | None = None
+    mcp_tool_endpoint_validate_invoice: str | None = None
+    mcp_tool_endpoint_query_integration_run_status: str | None = None
+    mcp_tool_endpoint_create_approval_request: str | None = None
+    mcp_tool_endpoint_create_servicenow_ticket: str | None = None
+    mcp_tool_endpoint_send_supplier_notification: str | None = None
     mcp_api_key: str | None = None
     mcp_timeout_seconds: int = 30
     mock_mcp: bool = True

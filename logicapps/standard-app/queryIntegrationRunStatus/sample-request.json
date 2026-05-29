@@ -1,3 +1,9 @@
 {
-  "correlation_id": "demo-corr-001"
+  "server_name": "logic-apps-standard-mcp",
+  "tool_name": "queryIntegrationRunStatus",
+  "correlation_id": "local-corr-run-001",
+  "payload": {
+    "correlation_id": "demo-corr-001"
+  },
+  "timeout_seconds": 30
 }

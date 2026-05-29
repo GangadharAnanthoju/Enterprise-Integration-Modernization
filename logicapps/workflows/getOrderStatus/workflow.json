@@ -10,27 +10,57 @@
           "schema": {
             "type": "object",
             "required": [
-              "order_id"
+              "server_name",
+              "tool_name",
+              "correlation_id",
+              "payload"
             ],
             "properties": {
-              "order_id": {
+              "server_name": {
                 "type": "string"
+              },
+              "tool_name": {
+                "type": "string"
+              },
+              "correlation_id": {
+                "type": "string"
+              },
+              "payload": {
+                "type": "object",
+                "required": [
+                  "order_id"
+                ],
+                "properties": {
+                  "order_id": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "timeout_seconds": {
+                "type": "integer"
               }
             },
-            "additionalProperties": false
+            "additionalProperties": true
           }
         }
       }
     },
     "actions": {
-      "Validate_order_id": {
+      "Validate_mcp_envelope": {
         "type": "If",
         "expression": {
           "and": [
             {
+              "equals": [
+                "@triggerBody()?['tool_name']",
+                "getOrderStatus"
+              ]
+            },
+            {
               "not": {
                 "equals": [
-                  "@triggerBody()?['order_id']",
+                  "@triggerBody()?['payload']?['order_id']",
                   null
                 ]
               }
@@ -38,7 +68,7 @@
             {
               "not": {
                 "equals": [
-                  "@triggerBody()?['order_id']",
+                  "@triggerBody()?['payload']?['order_id']",
                   ""
                 ]
               }
@@ -46,18 +76,18 @@
           ]
         },
         "actions": {
-          "Compose_order_status_response": {
+          "Compose_order_status_result": {
             "type": "Compose",
             "inputs": {
               "orderNumber": "4500098123",
-              "requestedOrderId": "@triggerBody()?['order_id']",
+              "requestedOrderId": "@triggerBody()?['payload']?['order_id']",
               "status": "In Transit",
               "estimatedDeliveryDate": "2026-05-21",
               "delayRisk": "Medium",
-              "correlationId": "@coalesce(triggerOutputs()?['headers']?['x-correlation-id'], workflow()?['run']?['name'])"
+              "correlationId": "@coalesce(triggerBody()?['correlation_id'], triggerOutputs()?['headers']?['x-correlation-id'], workflow()?['run']?['name'])"
             }
           },
-          "Return_order_status": {
+          "Return_mcp_order_status": {
             "type": "Response",
             "kind": "Http",
             "inputs": {
@@ -65,10 +95,14 @@
               "headers": {
                 "Content-Type": "application/json"
               },
-              "body": "@outputs('Compose_order_status_response')"
+              "body": {
+                "status": "completed",
+                "result": "@outputs('Compose_order_status_result')",
+                "message": "Remote MCP execution completed by local Logic Apps workflow."
+              }
             },
             "runAfter": {
-              "Compose_order_status_response": [
+              "Compose_order_status_result": [
                 "Succeeded"
               ]
             }
@@ -76,7 +110,7 @@
         },
         "else": {
           "actions": {
-            "Return_missing_order_id": {
+            "Return_invalid_mcp_request": {
               "type": "Response",
               "kind": "Http",
               "inputs": {
@@ -85,8 +119,9 @@
                   "Content-Type": "application/json"
                 },
                 "body": {
-                  "error": "missing_required_entity",
-                  "message": "The getOrderStatus workflow requires order_id."
+                  "status": "failed",
+                  "error": "invalid_mcp_request",
+                  "message": "The getOrderStatus workflow requires tool_name=getOrderStatus and payload.order_id."
                 }
               }
             }

@@ -7,6 +7,7 @@ settings complete and safe for the selected environment mode?
 from dataclasses import dataclass
 
 from config import Settings, get_settings
+from mcp.client import TOOL_ENDPOINT_SETTING_NAMES
 
 
 @dataclass(frozen=True)
@@ -86,13 +87,24 @@ def _check_remote_mcp_endpoint(settings: Settings) -> EnvironmentCheck:
         return EnvironmentCheck(
             name="remote_mcp_endpoint",
             status="pass",
-            details="Remote MCP endpoint is configured.",
+            details="Remote MCP fallback endpoint is configured.",
+        )
+
+    configured_tool_endpoints = _configured_tool_endpoint_names(settings)
+    if configured_tool_endpoints:
+        return EnvironmentCheck(
+            name="remote_mcp_endpoint",
+            status="pass",
+            details=(
+                "Remote MCP per-tool endpoints are configured for: "
+                f"{', '.join(configured_tool_endpoints)}."
+            ),
         )
 
     return EnvironmentCheck(
         name="remote_mcp_endpoint",
         status="fail",
-        details="Remote MCP mode requires MCP_SERVER_URL.",
+        details="Remote MCP mode requires MCP_SERVER_URL or at least one per-tool endpoint.",
     )
 
 
@@ -111,11 +123,31 @@ def _check_remote_mcp_auth(settings: Settings) -> EnvironmentCheck:
             details="Remote MCP API key is configured.",
         )
 
+    if _configured_tool_endpoint_names(settings):
+        return EnvironmentCheck(
+            name="remote_mcp_auth",
+            status="warning",
+            details=(
+                "Remote MCP API key is not configured. This is valid for local Logic Apps "
+                "callback URLs that include a sig token."
+            ),
+        )
+
     return EnvironmentCheck(
         name="remote_mcp_auth",
         status="fail",
         details="Remote MCP mode requires MCP_API_KEY.",
     )
+
+
+def _configured_tool_endpoint_names(settings: Settings) -> list[str]:
+    """Return tool names that have a dedicated remote endpoint configured."""
+
+    return [
+        tool_name
+        for tool_name, setting_name in TOOL_ENDPOINT_SETTING_NAMES.items()
+        if getattr(settings, setting_name)
+    ]
 
 
 def _check_foundry_runtime(settings: Settings) -> EnvironmentCheck:

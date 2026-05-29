@@ -206,6 +206,78 @@ Step 9G documents how to run or prepare the local `getOrderStatus` Logic Apps wo
 
 Step 9H completes the local Logic Apps workflow set. Every approved MCP tool now has a Logic Apps contract, sample request, workflow definition, and designer-project copy under `logicapps/standard-app`.
 
+**Q: What does Step 10A add?**
+
+Step 10A adds the Azure deployment review checkpoint. It identifies the existing resource group, proposed Logic Apps Standard app, low-cost workflow plan, required storage account, and resources to defer until later. No Azure resources are created in this step.
+
+**Q: Why review Azure resources before writing deployment code?**
+
+Enterprise deployments need name, cost, region, and scope review before provisioning. Step 10A separates the minimum required Logic Apps Standard resources from optional platform resources like Application Insights, Key Vault, API Management, Service Bus, and Function Apps.
+
+**Q: Which Azure resources are required first for Logic Apps Standard?**
+
+The first deployment needs the existing resource group, a Logic Apps Standard app, a Workflow Standard App Service plan, and a storage account. Observability, secrets, API gateway, and async messaging resources can be added later when the workflow endpoint is proven.
+
+**Q: What does Step 10B add?**
+
+Step 10B connects the agent's remote MCP HTTP client to a local Logic Apps Standard workflow. The `getOrderStatus` workflow now accepts the governed MCP envelope, reads `payload.order_id`, and returns the normalized remote MCP response shape.
+
+**Q: Why use local Logic Apps before Azure deployment?**
+
+It proves the same transport and workflow contract without paying for a hosted `WS1` Logic Apps Standard plan. The team can validate the agent, MCP envelope, correlation ID, and workflow response locally, then deploy later only when the path is ready.
+
+**Q: What is the limitation of the first local Logic Apps bridge?**
+
+The current config has one `MCP_SERVER_URL`, so the first bridge points to one workflow endpoint, starting with `getOrderStatus`. Later the project can add a dispatcher workflow, per-tool endpoint mapping, or a dedicated MCP facade.
+
+**Q: What does Step 10C add?**
+
+Step 10C adds per-tool Logic Apps endpoint mapping. The agent can select `getOrderStatus`, `checkShipmentStatus`, or another approved tool, and the MCP executor can resolve that tool to its own configured Logic Apps callback URL.
+
+**Q: Why use per-tool endpoints instead of a dispatcher?**
+
+Per-tool endpoints better match the project goal that each Logic Apps workflow becomes an MCP tool. Each tool keeps its own contract, risk level, backend mapping, and owner, while the agent still uses the governed tool registry to decide what can run.
+
+**Q: What does Step 10D add?**
+
+Step 10D converts `checkShipmentStatus` into a local Logic Apps MCP workflow. It accepts the governed MCP envelope, validates `tool_name=checkShipmentStatus` and `payload.shipment_id`, then returns a normalized remote MCP response.
+
+**Q: Why is adding a second local Logic Apps workflow important?**
+
+The first workflow proved the transport. The second workflow proves the architecture can scale by tool: each approved MCP tool can map to its own Logic Apps workflow endpoint instead of relying on one hardcoded URL.
+
+**Q: What does Step 10E add?**
+
+Step 10E converts `validateInvoice` into a local Logic Apps MCP workflow. It validates `tool_name=validateInvoice` and `payload.invoice_id`, then returns a normalized invoice validation result.
+
+**Q: What does having three low-risk workflows prove?**
+
+It proves the pattern is repeatable across business domains. The same agent planning, risk policy, MCP envelope, per-tool endpoint mapping, and Logic Apps response normalization work for orders, shipments, and invoices.
+
+**Q: What does Step 10F add?**
+
+Step 10F converts `queryIntegrationRunStatus` into a local Logic Apps MCP workflow. It validates `tool_name=queryIntegrationRunStatus` and `payload.correlation_id`, then returns a normalized integration run-status result.
+
+**Q: Why include an integration run-status workflow?**
+
+It shows that the agent can help both business users and support teams. The same governed MCP path can support operational troubleshooting without giving the agent direct backend access.
+
+**Q: What does Step 10G add?**
+
+Step 10G converts `sendSupplierNotification` and `createServiceNowTicket` into local Logic Apps MCP workflows. Both accept the governed MCP envelope and return normalized remote MCP responses.
+
+**Q: How are high-risk Logic Apps workflows controlled?**
+
+The workflows can run as backend endpoints, but the agent chat path does not call them directly. High-risk requests create approval requests first, and execution happens only through the approved-action path after a reviewer approves the request.
+
+**Q: What does Step 10H complete?**
+
+Step 10H completes the local Logic Apps MCP workflow set. All approved tools now have local workflow definitions that accept the same governed MCP envelope and return the same normalized response pattern.
+
+**Q: What is the Step 10 architecture outcome?**
+
+The agent can plan an approved tool, build a governed MCP envelope, choose a per-tool Logic Apps endpoint, call the local workflow over HTTP, and normalize the result. High-risk tools remain blocked by approval policy unless executed through the approved path.
+
 **Q: What is `PlannedAction`?**
 
 `PlannedAction` is the internal object that packages the selected tool, extracted entities, risk decision, approval requirement, readiness, and missing entities before execution.

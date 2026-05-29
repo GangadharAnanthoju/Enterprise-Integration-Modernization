@@ -115,3 +115,21 @@ def test_load_mcp_config_supports_remote_mode() -> None:
     assert config.endpoint_configured is True
     assert config.api_key_configured is True
     assert config.timeout_seconds == 45
+
+
+def test_load_mcp_config_supports_per_tool_remote_endpoints() -> None:
+    config = load_mcp_config(
+        Settings(
+            mock_mcp=False,
+            mcp_execution_mode="remote",
+            mcp_tool_endpoint_get_order_status="http://localhost:7071/order",
+            mcp_tool_endpoint_check_shipment_status="http://localhost:7071/shipment",
+        )
+    )
+
+    assert config.mode == McpExecutionMode.REMOTE
+    assert config.endpoint_url is None
+    assert config.endpoint_configured is True
+    assert config.endpoint_for_tool("getOrderStatus") == "http://localhost:7071/order"
+    assert config.endpoint_for_tool("checkShipmentStatus") == "http://localhost:7071/shipment"
+    assert config.endpoint_for_tool("validateInvoice") is None

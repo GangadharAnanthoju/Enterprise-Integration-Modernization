@@ -10,45 +10,123 @@
           "schema": {
             "type": "object",
             "required": [
-              "correlation_id"
+              "server_name",
+              "tool_name",
+              "correlation_id",
+              "payload"
             ],
             "properties": {
+              "server_name": {
+                "type": "string"
+              },
+              "tool_name": {
+                "type": "string"
+              },
               "correlation_id": {
                 "type": "string"
+              },
+              "payload": {
+                "type": "object",
+                "required": [
+                  "correlation_id"
+                ],
+                "properties": {
+                  "correlation_id": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "timeout_seconds": {
+                "type": "integer"
               }
             },
-            "additionalProperties": false
+            "additionalProperties": true
           }
         }
       }
     },
     "actions": {
-      "Compose_run_status_response": {
-        "type": "Compose",
-        "inputs": {
-          "runId": "RUN-90001",
-          "requestedCorrelationId": "@triggerBody()?['correlation_id']",
-          "status": "Failed",
-          "errorCategory": "BACKEND_TIMEOUT",
-          "correlationId": "@triggerBody()?['correlation_id']"
+      "Validate_mcp_envelope": {
+        "type": "If",
+        "expression": {
+          "and": [
+            {
+              "equals": [
+                "@triggerBody()?['tool_name']",
+                "queryIntegrationRunStatus"
+              ]
+            },
+            {
+              "not": {
+                "equals": [
+                  "@triggerBody()?['payload']?['correlation_id']",
+                  null
+                ]
+              }
+            },
+            {
+              "not": {
+                "equals": [
+                  "@triggerBody()?['payload']?['correlation_id']",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        "actions": {
+          "Compose_run_status_result": {
+            "type": "Compose",
+            "inputs": {
+              "runId": "RUN-90001",
+              "requestedCorrelationId": "@triggerBody()?['payload']?['correlation_id']",
+              "status": "Failed",
+              "errorCategory": "BACKEND_TIMEOUT",
+              "correlationId": "@coalesce(triggerBody()?['correlation_id'], triggerOutputs()?['headers']?['x-correlation-id'], workflow()?['run']?['name'])"
+            }
+          },
+          "Return_mcp_run_status": {
+            "type": "Response",
+            "kind": "Http",
+            "inputs": {
+              "statusCode": 200,
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "status": "completed",
+                "result": "@outputs('Compose_run_status_result')",
+                "message": "Remote MCP execution completed by local Logic Apps workflow."
+              }
+            },
+            "runAfter": {
+              "Compose_run_status_result": [
+                "Succeeded"
+              ]
+            }
+          }
+        },
+        "else": {
+          "actions": {
+            "Return_invalid_mcp_request": {
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 400,
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "status": "failed",
+                  "error": "invalid_mcp_request",
+                  "message": "The queryIntegrationRunStatus workflow requires tool_name=queryIntegrationRunStatus and payload.correlation_id."
+                }
+              }
+            }
+          }
         },
         "runAfter": {}
-      },
-      "Return_run_status": {
-        "type": "Response",
-        "kind": "Http",
-        "inputs": {
-          "statusCode": 200,
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "body": "@outputs('Compose_run_status_response')"
-        },
-        "runAfter": {
-          "Compose_run_status_response": [
-            "Succeeded"
-          ]
-        }
       }
     },
     "outputs": {}

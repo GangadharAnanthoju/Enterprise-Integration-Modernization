@@ -84,6 +84,27 @@ def test_remote_request_envelope_wraps_validated_mcp_request() -> None:
     }
 
 
+def test_remote_request_envelope_prefers_per_tool_endpoint() -> None:
+    config = McpServerConfig(
+        mode=McpExecutionMode.REMOTE,
+        server_name="logic-apps-prod-mcp",
+        endpoint_url="https://example.contoso/default",
+        timeout_seconds=45,
+        tool_endpoints={
+            "getOrderStatus": "https://example.contoso/get-order-status",
+        },
+    )
+    request = McpToolRequest(
+        tool_name="getOrderStatus",
+        correlation_id="remote-corr-001",
+        payload={"order_id": "ORD-1001"},
+    )
+
+    envelope = build_remote_request_envelope(config, request)
+
+    assert envelope.endpoint_url == "https://example.contoso/get-order-status"
+
+
 def test_remote_mcp_executor_requires_endpoint_configuration() -> None:
     tool = require_tool("getOrderStatus")
     executor = RemoteMcpExecutor(
