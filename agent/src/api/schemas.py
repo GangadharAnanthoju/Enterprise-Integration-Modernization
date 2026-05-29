@@ -67,6 +67,7 @@ class McpServerConfigResponse(BaseModel):
     mode: str
     server_name: str
     endpoint_configured: bool
+    api_key_configured: bool
     timeout_seconds: int
 
 

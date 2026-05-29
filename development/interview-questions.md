@@ -134,6 +134,18 @@ Because no real remote transport has been implemented yet. The remote executor c
 
 The project models missing configuration, not-yet-implemented transport, timeout, authentication or authorization failure, and backend workflow failure.
 
+**Q: What did Step 7 add?**
+
+Step 7 turned the remote MCP placeholder into a tested HTTP client path. It uses `httpx`, sends the governed MCP envelope as JSON, includes correlation/tool headers, supports bearer API-key auth, normalizes JSON responses, and maps remote failures into specific exceptions.
+
+**Q: How do you test remote MCP without a real endpoint?**
+
+The tests use `httpx.MockTransport`. That lets us verify request body, headers, response normalization, auth failures, and timeout handling without making network calls.
+
+**Q: How do you avoid leaking MCP secrets?**
+
+The config object can carry the API key for the remote client, but public API diagnostics expose only `api_key_configured=true/false`. The key value is not returned from `/mcp/config` or audit responses.
+
 **Q: What is `PlannedAction`?**
 
 `PlannedAction` is the internal object that packages the selected tool, extracted entities, risk decision, approval requirement, readiness, and missing entities before execution.

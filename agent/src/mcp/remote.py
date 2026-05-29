@@ -1,11 +1,8 @@
-"""Remote MCP transport helpers.
-
-This module keeps the future HTTP transport separate from policy, request
-building, and local mock execution. It intentionally does not make network
-calls yet.
-"""
+"""Remote MCP transport helpers."""
 
 from dataclasses import dataclass
+
+import httpx
 
 from mcp.exceptions import (
     RemoteMcpAuthenticationError,
@@ -38,14 +35,63 @@ def build_remote_request_envelope(
 
 @dataclass(frozen=True)
 class RemoteMcpHttpClient:
-    """Placeholder for the future remote MCP HTTP transport."""
+    """HTTP client for remote Logic Apps Standard MCP execution."""
 
     config: McpServerConfig
+    transport: httpx.BaseTransport | None = None
 
     def send(self, envelope: McpRemoteRequestEnvelope) -> dict[str, object]:
-        """Fail safely until real HTTP transport is implemented."""
+        """POST the MCP envelope to the configured remote endpoint."""
 
-        raise RemoteMcpNotImplementedError(envelope.server_name, envelope.endpoint_url)
+        headers = {
+            "Content-Type": "application/json",
+            "X-Correlation-ID": envelope.correlation_id,
+            "X-MCP-Tool-Name": envelope.tool_name,
+        }
+        if self.config.api_key:
+            headers["Authorization"] = f"Bearer {self.config.api_key}"
+
+        try:
+            with httpx.Client(
+                timeout=envelope.timeout_seconds,
+                transport=self.transport,
+            ) as client:
+                response = client.post(
+                    envelope.endpoint_url,
+                    json=envelope.to_http_json(),
+                    headers=headers,
+                )
+        except httpx.TimeoutException as exc:
+            raise RemoteMcpTimeoutError(
+                envelope.server_name,
+                envelope.timeout_seconds,
+            ) from exc
+
+        if response.status_code >= 400:
+            raise map_remote_http_error(
+                server_name=envelope.server_name,
+                status_code=response.status_code,
+                detail=response.text,
+                timeout_seconds=envelope.timeout_seconds,
+            )
+
+        try:
+            body = response.json()
+        except ValueError as exc:
+            raise RemoteMcpBackendError(
+                envelope.server_name,
+                response.status_code,
+                "Remote MCP response was not valid JSON.",
+            ) from exc
+
+        if not isinstance(body, dict):
+            raise RemoteMcpBackendError(
+                envelope.server_name,
+                response.status_code,
+                "Remote MCP response JSON must be an object.",
+            )
+
+        return body
 
 
 def map_remote_http_error(

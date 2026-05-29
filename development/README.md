@@ -45,4 +45,10 @@ The goal is to make the AI project understandable from an Azure Integration Serv
 | 6D | Add remote MCP error handling | `step6/step-6d-remote-mcp-error-handling.md` |
 | 6E | Add MCP execution diagnostics | `step6/step-6e-mcp-execution-diagnostics.md` |
 | 6F | Finish Step 6 with tests and documentation | `step6/step-6f-step-6-completion.md` |
+| 7A | Add remote HTTP contract and safe config exposure | `step7/step-7a-remote-http-contract.md` |
+| 7B | Implement remote MCP HTTP client | `step7/step-7b-remote-http-client.md` |
+| 7C | Add remote auth header support | `step7/step-7c-remote-auth-headers.md` |
+| 7D | Normalize remote MCP responses | `step7/step-7d-remote-response-normalization.md` |
+| 7E | Add remote MCP error tests | `step7/step-7e-remote-error-tests.md` |
+| 7F | Finish Step 7 with docs and verification | `step7/step-7f-step-7-completion.md` |
 | Local setup | Create a root Python virtual environment | `local-python-environment.md` |

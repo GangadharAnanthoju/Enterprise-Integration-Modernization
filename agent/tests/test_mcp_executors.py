@@ -1,13 +1,18 @@
 import pytest
+import httpx
 
-from mcp.exceptions import RemoteMcpConfigurationError, RemoteMcpNotImplementedError
+from mcp.exceptions import (
+    RemoteMcpAuthenticationError,
+    RemoteMcpConfigurationError,
+    RemoteMcpTimeoutError,
+)
 from mcp.executors import (
     MockMcpExecutor,
     RemoteMcpExecutor,
     get_mcp_executor,
     get_mcp_executor_diagnostics,
 )
-from mcp.remote import build_remote_request_envelope, map_remote_http_error
+from mcp.remote import RemoteMcpHttpClient, build_remote_request_envelope, map_remote_http_error
 from mcp.schemas import McpExecutionMode, McpServerConfig, McpToolRequest
 from tools.registry import require_tool
 
@@ -103,29 +108,126 @@ def test_remote_mcp_executor_requires_endpoint_configuration() -> None:
     assert exc_info.value.server_name == "logic-apps-prod-mcp"
 
 
-def test_remote_mcp_executor_fails_safely_until_transport_is_implemented() -> None:
+def test_remote_mcp_http_client_posts_envelope_with_safe_auth_headers() -> None:
+    captured_request: httpx.Request | None = None
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal captured_request
+        captured_request = request
+        return httpx.Response(
+            200,
+            json={
+                "status": "completed",
+                "result": {"orderNumber": "4500098123"},
+                "message": "Remote MCP execution completed.",
+            },
+        )
+
+    config = McpServerConfig(
+        mode=McpExecutionMode.REMOTE,
+        server_name="logic-apps-prod-mcp",
+        endpoint_url="https://example.contoso/mcp",
+        timeout_seconds=45,
+        api_key="secret-token",
+    )
+    client = RemoteMcpHttpClient(config, transport=httpx.MockTransport(handler))
+    envelope = build_remote_request_envelope(
+        config,
+        McpToolRequest(
+            tool_name="getOrderStatus",
+            correlation_id="remote-corr-003",
+            payload={"order_id": "ORD-1001"},
+        ),
+    )
+
+    response = client.send(envelope)
+
+    assert response["status"] == "completed"
+    assert response["result"] == {"orderNumber": "4500098123"}
+    assert captured_request is not None
+    assert captured_request.url == "https://example.contoso/mcp"
+    assert captured_request.headers["Authorization"] == "Bearer secret-token"
+    assert captured_request.headers["X-Correlation-ID"] == "remote-corr-003"
+    assert captured_request.headers["X-MCP-Tool-Name"] == "getOrderStatus"
+    assert captured_request.read() == (
+        b'{"server_name":"logic-apps-prod-mcp","tool_name":"getOrderStatus",'
+        b'"correlation_id":"remote-corr-003","payload":{"order_id":"ORD-1001"}}'
+    )
+
+
+def test_remote_mcp_executor_returns_normalized_remote_output() -> None:
     tool = require_tool("getOrderStatus")
+    config = McpServerConfig(
+        mode=McpExecutionMode.REMOTE,
+        server_name="logic-apps-prod-mcp",
+        endpoint_url="https://example.contoso/mcp",
+        timeout_seconds=45,
+    )
+    http_client = RemoteMcpHttpClient(
+        config,
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(
+                200,
+                json={
+                    "status": "completed",
+                    "result": {"orderNumber": "4500098123"},
+                    "message": "Remote execution completed.",
+                },
+            )
+        ),
+    )
     executor = RemoteMcpExecutor(
-        config=McpServerConfig(
-            mode=McpExecutionMode.REMOTE,
-            server_name="logic-apps-prod-mcp",
-            endpoint_url="https://example.contoso/mcp",
-            timeout_seconds=45,
+        config=config,
+        http_client=http_client,
+    )
+
+    output = executor.execute(
+        tool,
+        request=McpToolRequest(
+            tool_name="getOrderStatus",
+            correlation_id="remote-corr-004",
+            payload={"order_id": "ORD-1001"},
+        ),
+    )
+
+    assert output.mode == "remote"
+    assert output.status == "completed"
+    assert output.result == {"orderNumber": "4500098123"}
+    assert output.message == "Remote execution completed."
+
+
+def test_remote_mcp_http_client_maps_auth_and_timeout_failures() -> None:
+    auth_config = McpServerConfig(
+        mode=McpExecutionMode.REMOTE,
+        server_name="logic-apps-prod-mcp",
+        endpoint_url="https://example.contoso/mcp",
+        timeout_seconds=45,
+    )
+    envelope = build_remote_request_envelope(
+        auth_config,
+        McpToolRequest(
+            tool_name="getOrderStatus",
+            correlation_id="remote-corr-005",
+            payload={"order_id": "ORD-1001"},
         )
     )
 
-    with pytest.raises(RemoteMcpNotImplementedError) as exc_info:
-        executor.execute(
-            tool,
-            request=McpToolRequest(
-                tool_name="getOrderStatus",
-                correlation_id="remote-corr-003",
-                payload={"order_id": "ORD-1001"},
-            ),
-        )
+    auth_client = RemoteMcpHttpClient(
+        auth_config,
+        transport=httpx.MockTransport(lambda request: httpx.Response(401, text="Unauthorized")),
+    )
+    timeout_client = RemoteMcpHttpClient(
+        auth_config,
+        transport=httpx.MockTransport(
+            lambda request: (_ for _ in ()).throw(httpx.TimeoutException("timeout"))
+        ),
+    )
 
-    assert exc_info.value.server_name == "logic-apps-prod-mcp"
-    assert exc_info.value.endpoint_url == "https://example.contoso/mcp"
+    with pytest.raises(RemoteMcpAuthenticationError):
+        auth_client.send(envelope)
+
+    with pytest.raises(RemoteMcpTimeoutError):
+        timeout_client.send(envelope)
 
 
 def test_mcp_executor_diagnostics_describe_active_executor() -> None:
@@ -142,7 +244,7 @@ def test_mcp_executor_diagnostics_describe_active_executor() -> None:
     assert diagnostics.executor_name == "RemoteMcpExecutor"
     assert diagnostics.server_name == "logic-apps-prod-mcp"
     assert diagnostics.endpoint_configured is True
-    assert diagnostics.remote_transport == "placeholder_http_client"
+    assert diagnostics.remote_transport == "httpx"
 
 
 def test_remote_http_error_mapping_uses_specific_exception_types() -> None:

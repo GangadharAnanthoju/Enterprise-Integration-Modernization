@@ -68,6 +68,7 @@ def load_mcp_config(settings: Settings | None = None) -> McpServerConfig:
         server_name=resolved_settings.mcp_server_name,
         endpoint_url=resolved_settings.mcp_server_url,
         timeout_seconds=resolved_settings.mcp_timeout_seconds,
+        api_key=resolved_settings.mcp_api_key,
     )
 
 

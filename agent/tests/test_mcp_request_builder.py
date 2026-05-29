@@ -93,6 +93,7 @@ def test_load_mcp_config_defaults_to_mock_mode() -> None:
     assert config.server_name == "logic-apps-standard-mcp"
     assert config.endpoint_url is None
     assert config.endpoint_configured is False
+    assert config.api_key_configured is False
     assert config.timeout_seconds == 30
 
 
@@ -103,6 +104,7 @@ def test_load_mcp_config_supports_remote_mode() -> None:
             mcp_execution_mode="remote",
             mcp_server_name="logic-apps-prod-mcp",
             mcp_server_url="https://example.contoso/mcp",
+            mcp_api_key="secret-token",
             mcp_timeout_seconds=45,
         )
     )
@@ -111,4 +113,5 @@ def test_load_mcp_config_supports_remote_mode() -> None:
     assert config.server_name == "logic-apps-prod-mcp"
     assert config.endpoint_url == "https://example.contoso/mcp"
     assert config.endpoint_configured is True
+    assert config.api_key_configured is True
     assert config.timeout_seconds == 45

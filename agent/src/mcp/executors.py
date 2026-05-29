@@ -111,7 +111,7 @@ def get_mcp_executor_diagnostics(config: McpServerConfig) -> McpExecutorDiagnost
         remote_transport=(
             "not_configured"
             if config.mode == McpExecutionMode.MOCK
-            else "placeholder_http_client"
+            else "httpx"
         ),
     )
 

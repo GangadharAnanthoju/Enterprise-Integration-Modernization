@@ -300,6 +300,7 @@ def _to_mcp_config_response(config: McpServerConfig) -> McpServerConfigResponse:
         mode=config.mode.value,
         server_name=config.server_name,
         endpoint_configured=config.endpoint_configured,
+        api_key_configured=config.api_key_configured,
         timeout_seconds=config.timeout_seconds,
     )
 

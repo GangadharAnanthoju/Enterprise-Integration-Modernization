@@ -38,6 +38,7 @@ def test_mcp_config_endpoint_returns_safe_runtime_config() -> None:
         "mode": "mock",
         "server_name": "logic-apps-standard-mcp",
         "endpoint_configured": False,
+        "api_key_configured": False,
         "timeout_seconds": 30,
     }
 

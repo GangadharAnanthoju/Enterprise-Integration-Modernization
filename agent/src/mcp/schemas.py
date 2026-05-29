@@ -36,12 +36,19 @@ class McpServerConfig:
     server_name: str
     endpoint_url: str | None
     timeout_seconds: int
+    api_key: str | None = None
 
     @property
     def endpoint_configured(self) -> bool:
         """Return whether a remote MCP endpoint URL is configured."""
 
         return bool(self.endpoint_url)
+
+    @property
+    def api_key_configured(self) -> bool:
+        """Return whether an API key is configured without exposing the secret."""
+
+        return bool(self.api_key)
 
 
 @dataclass(frozen=True)
