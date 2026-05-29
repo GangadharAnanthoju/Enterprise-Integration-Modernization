@@ -1,3 +1,0 @@
-# Root install file for local development.
-# Keep package versions in agent/requirements.txt for now.
--r agent/requirements.txt

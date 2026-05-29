@@ -6,7 +6,9 @@ status: local_design_skeleton
 
 runtime:
   target: microsoft_foundry
+  framework: microsoft_agent_framework
   currentImplementation: local_rule_based_adapter
+  targetImplementation: maf_foundry_agent_adapter
   adapter: agent/src/foundry/agent_adapter.py
   apiBoundary: FastAPI /agent/chat
 

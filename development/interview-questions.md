@@ -142,6 +142,22 @@ The system checks that an approval request exists, that a reviewer approved it, 
 
 Foundry is the future agent runtime and governance plane. It can host or orchestrate the agent, store/version instructions, attach tools, run evaluations, capture traces, and support operational readiness.
 
+**Q: What resources are needed before creating the real Foundry agent?**
+
+I would confirm the Foundry project endpoint, Azure tenant, subscription, resource group, Foundry account, Foundry project name, model deployment, agent name, authentication/RBAC, evaluation dataset, and observability path. Runtime values and Azure resource context are related but separate: the runtime needs endpoint and model deployment, while operations and registration need subscription, resource group, account, and project names.
+
+**Q: Where does Microsoft Agent Framework fit?**
+
+Microsoft Agent Framework is the agent implementation path. Foundry is the runtime and governance platform. In this project, the target is a MAF-backed agent registered in Foundry, with FastAPI still acting as the enterprise control plane and MCP remaining the backend execution boundary.
+
+**Q: Why add a local MAF skeleton before creating the live Foundry agent?**
+
+The skeleton lets me validate the runtime shape first: agent name, project endpoint, model deployment, instruction file, MCP boundary, and FastAPI control plane. That reduces risk before installing live SDK dependencies or creating cloud agent resources.
+
+**Q: What is the difference between registering and publishing a Foundry agent?**
+
+Registration creates or updates the agent inside the Foundry project so it can be tested with instructions, model deployment, and tools. Publishing promotes a tested agent version into an Agent Application with a stable invocation endpoint, RBAC, and deployment lifecycle. I would register and test first, then publish later.
+
 **Q: Why keep Foundry code isolated?**
 
 SDKs and runtime patterns can evolve. By isolating Foundry-specific code behind an adapter boundary, the FastAPI routes, MCP layer, risk policy, and Logic Apps workflows remain stable even when the agent runtime changes.

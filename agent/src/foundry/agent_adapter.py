@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from agent_app import AgentChatResult, handle_chat_message
+from maf_runtime.enterprise_agent import build_enterprise_maf_agent_skeleton
 
 
 class AgentRuntimeAdapter(Protocol):
@@ -43,6 +44,30 @@ class LocalRuleBasedAgentAdapter:
     ) -> AgentChatResult:
         """Delegate chat handling to the current transparent rule-based shell."""
 
+        return handle_chat_message(
+            user_message=user_message,
+            correlation_id=correlation_id,
+            simulate_when_ready=simulate_when_ready,
+        )
+
+
+@dataclass(frozen=True)
+class MafFoundryAgentAdapter:
+    """Future adapter for a Microsoft Agent Framework agent hosted in Foundry."""
+
+    name: str = "enterprise-integration-agent"
+    runtime: str = "microsoft_foundry"
+    implementation_status: str = "maf_skeleton_ready_not_active"
+
+    def chat(
+        self,
+        user_message: str,
+        correlation_id: str,
+        simulate_when_ready: bool = False,
+    ) -> AgentChatResult:
+        """Temporary compatibility path until live MAF invocation is enabled."""
+
+        build_enterprise_maf_agent_skeleton()
         return handle_chat_message(
             user_message=user_message,
             correlation_id=correlation_id,

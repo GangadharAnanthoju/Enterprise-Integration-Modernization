@@ -76,9 +76,9 @@ def load_mcp_config(settings: Settings | None = None) -> McpServerConfig:
     return McpServerConfig(
         mode=mode,
         server_name=resolved_settings.mcp_server_name,
-        endpoint_url=resolved_settings.mcp_server_url,
+        endpoint_url=_blank_to_none(resolved_settings.mcp_server_url),
         timeout_seconds=resolved_settings.mcp_timeout_seconds,
-        api_key=resolved_settings.mcp_api_key,
+        api_key=_blank_to_none(resolved_settings.mcp_api_key),
         tool_endpoints=_load_tool_endpoints(resolved_settings),
     )
 
@@ -93,6 +93,15 @@ def _load_tool_endpoints(settings: Settings) -> dict[str, str]:
             endpoints[tool_name] = endpoint_url
 
     return endpoints
+
+
+def _blank_to_none(value: str | None) -> str | None:
+    """Treat empty environment values as unset configuration."""
+
+    if value is None:
+        return None
+    stripped_value = value.strip()
+    return stripped_value or None
 
 
 def simulate_mcp_tool(

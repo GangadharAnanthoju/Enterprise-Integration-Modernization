@@ -463,6 +463,8 @@ def test_operations_readiness_endpoint_returns_ready_report() -> None:
         "agent_runtime_adapter",
         "foundry_agent_definition",
         "foundry_tool_registration",
+        "maf_agent_skeleton",
+        "foundry_registration_preflight",
         "environment_validation",
     }
 
@@ -477,7 +479,8 @@ def test_operations_environment_endpoint_returns_validation_report() -> None:
     assert checks["mcp_mode"]["status"] == "pass"
     assert checks["remote_mcp_endpoint"]["status"] == "skip"
     assert checks["remote_mcp_auth"]["status"] == "skip"
-    assert checks["foundry_runtime"]["status"] == "warning"
+    assert checks["foundry_runtime"]["status"] == "pass"
+    assert checks["foundry_resource_context"]["status"] == "pass"
     assert checks["appinsights"]["status"] == "warning"
 
 

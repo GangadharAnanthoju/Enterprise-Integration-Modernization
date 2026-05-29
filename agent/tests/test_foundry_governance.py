@@ -16,6 +16,8 @@ def test_readiness_checks_pass_for_local_governed_agent() -> None:
         "agent_runtime_adapter",
         "foundry_agent_definition",
         "foundry_tool_registration",
+        "maf_agent_skeleton",
+        "foundry_registration_preflight",
         "environment_validation",
     }
     assert all(check.status == "pass" for check in report.checks)

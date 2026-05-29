@@ -8,7 +8,7 @@ Step 8A planned the environment strategy. Step 8B turns that plan into a concret
 
 ## What Changed
 
-- Updated the root `.env.example`.
+- Updated `agent/.env.example`.
 - Made mock MCP mode the safe default.
 - Added explicit MCP runtime fields:
   - `MOCK_MCP`
@@ -26,10 +26,10 @@ Step 8A planned the environment strategy. Step 8B turns that plan into a concret
 Copy the example file to a private `.env`:
 
 ```powershell
-Copy-Item .env.example .env
+Copy-Item agent\.env.example agent\.env
 ```
 
-Keep `.env` private. It is ignored by git.
+Keep `agent\.env` private. It is ignored by git.
 
 ## Local Mock Mode
 

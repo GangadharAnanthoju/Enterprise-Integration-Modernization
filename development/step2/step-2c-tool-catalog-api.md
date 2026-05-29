@@ -39,7 +39,7 @@ For an Azure Integration specialist, this is similar to publishing a read-only c
 
 ## How To Run Locally
 
-From the repo root, after activating `.venv` and installing requirements:
+From the repo root, after activating `agent\.venv` and installing `agent\requirements.txt`:
 
 ```powershell
 cd agent\src

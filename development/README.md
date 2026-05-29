@@ -79,5 +79,11 @@ The goal is to make the AI project understandable from an Azure Integration Serv
 | 11D | Add Foundry tool registration metadata | `step11/step-11d-foundry-tool-registration-metadata.md` |
 | 11E | Connect Foundry artifacts to readiness checks | `step11/step-11e-foundry-readiness-integration.md` |
 | 11F | Finish Step 11 Foundry preparation | `step11/step-11f-step-11-completion.md` |
+| 12A | Plan real Foundry resources and agent creation path | `step12/step-12a-foundry-resource-plan.md` |
+| 12B | Capture Foundry environment checklist | `step12/step-12b-foundry-environment-checklist.md` |
+| 12C | Plan MAF-backed Foundry agent registration | `step12/step-12c-maf-foundry-registration-plan.md` |
+| 12D | Add local MAF agent skeleton | `step12/step-12d-local-maf-agent-skeleton.md` |
+| 12E | Plan Foundry invocation boundary | `step12/step-12e-foundry-invocation-boundary-plan.md` |
+| 12F | Finish Step 12 MAF and Foundry preparation | `step12/step-12f-step-12-completion.md` |
 | Azure setup | Environment variable guide for local and Azure settings | `azure-environment-setup.md` |
 | Local setup | Create a root Python virtual environment | `local-python-environment.md` |

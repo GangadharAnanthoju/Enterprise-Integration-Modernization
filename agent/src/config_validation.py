@@ -36,6 +36,7 @@ def validate_environment(settings: Settings | None = None) -> EnvironmentValidat
         _check_remote_mcp_endpoint(resolved_settings),
         _check_remote_mcp_auth(resolved_settings),
         _check_foundry_runtime(resolved_settings),
+        _check_foundry_resource_context(resolved_settings),
         _check_appinsights(resolved_settings),
     ]
     report_status = (
@@ -162,6 +163,32 @@ def _check_foundry_runtime(settings: Settings) -> EnvironmentCheck:
         name="foundry_runtime",
         status="warning",
         details="Foundry runtime settings are not fully configured yet.",
+    )
+
+
+def _check_foundry_resource_context(settings: Settings) -> EnvironmentCheck:
+    required_values = {
+        "AZURE_TENANT_ID": settings.azure_tenant_id,
+        "AZURE_SUBSCRIPTION_ID": settings.azure_subscription_id,
+        "AZURE_RESOURCE_GROUP": settings.azure_resource_group,
+        "AZURE_AI_ACCOUNT_NAME": settings.azure_ai_account_name,
+        "AZURE_AI_PROJECT_NAME": settings.azure_ai_project_name,
+    }
+    missing_names = [name for name, value in required_values.items() if not value]
+    if not missing_names:
+        return EnvironmentCheck(
+            name="foundry_resource_context",
+            status="pass",
+            details="Foundry Azure resource context is configured.",
+        )
+
+    return EnvironmentCheck(
+        name="foundry_resource_context",
+        status="warning",
+        details=(
+            "Foundry Azure resource context is incomplete: "
+            f"{', '.join(missing_names)}."
+        ),
     )
 
 

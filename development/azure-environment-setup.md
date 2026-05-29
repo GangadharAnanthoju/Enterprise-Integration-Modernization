@@ -4,15 +4,15 @@ This guide explains the environment variables used by the Enterprise Integration
 
 The project is safe by default: it runs in mock MCP mode unless remote mode is explicitly configured.
 
-## Create Your Local `.env`
+## Create Your Local Agent `.env`
 
 Copy the committed template:
 
 ```powershell
-Copy-Item .env.example .env
+Copy-Item agent\.env.example agent\.env
 ```
 
-Then edit `.env` locally. Do not commit `.env`.
+Then edit `agent\.env` locally. Do not commit `agent\.env`.
 
 ## Local Mock Mode
 
@@ -49,6 +49,10 @@ FOUNDRY_PROJECT_ENDPOINT=https://your-foundry-project-endpoint
 MODEL_DEPLOYMENT_NAME=your-model-deployment
 FOUNDRY_AGENT_NAME=enterprise-integration-agent
 FOUNDRY_EVAL_DATASET_NAME=enterprise-mcp-regression
+AZURE_SUBSCRIPTION_ID=your-subscription-id
+AZURE_RESOURCE_GROUP=your-foundry-resource-group
+AZURE_AI_ACCOUNT_NAME=your-foundry-account-name
+AZURE_AI_PROJECT_NAME=your-foundry-project-name
 ```
 
 ## Observability Settings
@@ -64,7 +68,7 @@ LOG_ANALYTICS_WORKSPACE_ID=your-log-analytics-workspace-id
 
 Do not commit real secrets.
 
-For local development, use a private `.env` file. For Azure deployment, move secrets to Key Vault or managed platform configuration.
+For local development, use a private `agent\.env` file. For Azure deployment, move secrets to Key Vault or managed platform configuration.
 
 The API may expose safe booleans such as `api_key_configured`, but it must never return `MCP_API_KEY`.
 

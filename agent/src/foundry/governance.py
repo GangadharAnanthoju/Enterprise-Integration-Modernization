@@ -8,8 +8,10 @@ from config import Settings
 from config_validation import validate_environment
 from foundry.agent_definition import validate_foundry_agent_definition
 from foundry.agent_adapter import get_agent_adapter
+from foundry.registration_plan import run_foundry_registration_preflight
 from foundry.tracing import audit_event_to_foundry_trace
 from foundry.tool_registration import validate_foundry_tool_registrations
+from maf_runtime.enterprise_agent import validate_enterprise_maf_agent_skeleton
 from mcp.client import load_mcp_config
 from mcp.schemas import McpExecutionMode
 from tools.registry import list_tools
@@ -52,6 +54,8 @@ def run_readiness_checks(settings: Settings | None = None) -> ReadinessReport:
         _check_agent_runtime_adapter(),
         _check_foundry_agent_definition(),
         _check_foundry_tool_registration(),
+        _check_maf_agent_skeleton(settings),
+        _check_foundry_registration_preflight(settings),
         _check_environment_validation(settings),
     ]
     report_status = "ready" if all(check.status == "pass" for check in checks) else "needs_attention"
@@ -221,6 +225,38 @@ def _check_foundry_tool_registration() -> ReadinessCheck:
         name="foundry_tool_registration",
         status="fail",
         details=f"Foundry tool registration metadata needs attention: {'; '.join(missing)}.",
+    )
+
+
+def _check_maf_agent_skeleton(settings: Settings | None = None) -> ReadinessCheck:
+    missing = validate_enterprise_maf_agent_skeleton(settings)
+    if not missing:
+        return ReadinessCheck(
+            name="maf_agent_skeleton",
+            status="pass",
+            details="Local Microsoft Agent Framework skeleton is configured.",
+        )
+
+    return ReadinessCheck(
+        name="maf_agent_skeleton",
+        status="fail",
+        details=f"MAF agent skeleton needs attention: {'; '.join(missing)}.",
+    )
+
+
+def _check_foundry_registration_preflight(settings: Settings | None = None) -> ReadinessCheck:
+    preflight = run_foundry_registration_preflight(settings)
+    if preflight.status == "ready":
+        return ReadinessCheck(
+            name="foundry_registration_preflight",
+            status="pass",
+            details="Foundry registration preflight is ready.",
+        )
+
+    return ReadinessCheck(
+        name="foundry_registration_preflight",
+        status="fail",
+        details=f"Foundry registration preflight needs attention: {'; '.join(preflight.missing)}.",
     )
 
 

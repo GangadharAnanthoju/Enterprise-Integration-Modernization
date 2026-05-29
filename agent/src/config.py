@@ -8,6 +8,10 @@ class Settings(BaseSettings):
     model_deployment_name: str | None = None
     foundry_agent_name: str = "enterprise-integration-agent"
     foundry_eval_dataset_name: str = "enterprise-mcp-regression"
+    azure_subscription_id: str | None = None
+    azure_resource_group: str | None = None
+    azure_ai_account_name: str | None = None
+    azure_ai_project_name: str | None = None
     mcp_execution_mode: str = "mock"
     mcp_server_name: str = "logic-apps-standard-mcp"
     mcp_server_url: str | None = None

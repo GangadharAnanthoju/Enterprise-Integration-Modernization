@@ -3,7 +3,7 @@ from config_validation import validate_environment
 
 
 def test_validate_environment_passes_for_default_mock_mode() -> None:
-    report = validate_environment(Settings())
+    report = validate_environment(Settings(_env_file=None))
 
     assert report.status == "ready"
     checks = {check.name: check for check in report.checks}
@@ -11,6 +11,7 @@ def test_validate_environment_passes_for_default_mock_mode() -> None:
     assert checks["remote_mcp_endpoint"].status == "skip"
     assert checks["remote_mcp_auth"].status == "skip"
     assert checks["foundry_runtime"].status == "warning"
+    assert checks["foundry_resource_context"].status == "warning"
     assert checks["appinsights"].status == "warning"
 
 
@@ -23,6 +24,11 @@ def test_validate_environment_passes_for_complete_remote_mcp_settings() -> None:
             mcp_api_key="secret-token",
             foundry_project_endpoint="https://example.services.ai.azure.com",
             model_deployment_name="gpt-4.1-mini",
+            azure_tenant_id="tenant-id",
+            azure_subscription_id="subscription-id",
+            azure_resource_group="rg-sysint-ms-foundry",
+            azure_ai_account_name="ms-foundry-sysint-02",
+            azure_ai_project_name="proj-sysint-01",
             applicationinsights_connection_string="InstrumentationKey=test",
         )
     )
@@ -33,6 +39,7 @@ def test_validate_environment_passes_for_complete_remote_mcp_settings() -> None:
     assert checks["remote_mcp_endpoint"].status == "pass"
     assert checks["remote_mcp_auth"].status == "pass"
     assert checks["foundry_runtime"].status == "pass"
+    assert checks["foundry_resource_context"].status == "pass"
     assert checks["appinsights"].status == "pass"
 
 
@@ -58,7 +65,9 @@ def test_validate_environment_fails_for_remote_mode_without_endpoint_or_key() ->
 
 
 def test_validate_environment_fails_for_inconsistent_mcp_mode() -> None:
-    report = validate_environment(Settings(mock_mcp=True, mcp_execution_mode="remote"))
+    report = validate_environment(
+        Settings(_env_file=None, mock_mcp=True, mcp_execution_mode="remote")
+    )
 
     checks = {check.name: check for check in report.checks}
     assert report.status == "needs_attention"
