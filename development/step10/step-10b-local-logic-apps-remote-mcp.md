@@ -84,12 +84,19 @@ Then:
    MCP_API_KEY=
    ```
 
-5. Start the FastAPI agent service.
+5. Start the FastAPI agent service from the `agent` folder:
+
+   ```powershell
+   .\.venv\Scripts\Activate.ps1
+   $env:PYTHONPATH="src"
+   uvicorn src.main:app --reload --port 8001
+   ```
+
 6. Call `/agent/chat` with `simulate_when_ready=true` and a message like:
 
    ```json
    {
-     "message": "Check order ORD-1001",
+     "user_message": "Check order ORD-1001",
      "simulate_when_ready": true
    }
    ```

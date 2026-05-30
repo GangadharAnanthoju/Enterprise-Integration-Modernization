@@ -154,9 +154,37 @@ Microsoft Agent Framework is the agent implementation path. Foundry is the runti
 
 The skeleton lets me validate the runtime shape first: agent name, project endpoint, model deployment, instruction file, MCP boundary, and FastAPI control plane. That reduces risk before installing live SDK dependencies or creating cloud agent resources.
 
+**Q: What did you actually create in Foundry?**
+
+I created a real Foundry agent version named `enterprise-integration-agent:1` in the configured Foundry project. It uses the `gpt-4.1-mini` model deployment and the governed instruction file from the repo. It is active for testing, but it is not published as a production Agent Application yet.
+
+**Q: Why install `agent-framework-foundry` and `azure-ai-projects`?**
+
+`agent-framework-foundry` gives the project the Microsoft Agent Framework and Foundry integration path. `azure-ai-projects` gives the code an `AIProjectClient` that can create or update agent versions in the Foundry project. This keeps live Foundry operations in code instead of doing them manually in the portal.
+
+**Q: How did you avoid accidentally creating cloud resources during tests?**
+
+The live Foundry registration code is isolated in `foundry/live_agent.py`, and unit tests pass fake project clients into that module. Normal tests validate request shape, metadata, instructions, and preflight behavior without calling Azure.
+
+**Q: How did you test live Foundry invocation without making every test call Azure?**
+
+I added a small invocation helper that accepts an optional runtime agent object. Unit tests pass a fake runtime agent and verify the message, response ID, version, and response text mapping. The real `FoundryAgent` client is only created when running a live invocation manually.
+
+**Q: How can the same FastAPI endpoint use either local planning or the live Foundry agent?**
+
+I added `AGENT_RUNTIME_MODE`. In `local` mode, `/agent/chat` uses the existing local rule-based adapter and can reach MCP execution when policy allows it. In `foundry` mode, the same endpoint invokes the live Foundry agent version and returns the agent's planning response, but it does not execute backend tools yet.
+
+**Q: Why is Foundry mode planning-only at this stage?**
+
+Because backend execution still needs policy enforcement, approval checks, audit events, and MCP envelope validation. Until the Foundry tool attachment pattern is finalized, FastAPI remains the enforcement point and Foundry mode is used to validate real agent reasoning safely.
+
 **Q: What is the difference between registering and publishing a Foundry agent?**
 
 Registration creates or updates the agent inside the Foundry project so it can be tested with instructions, model deployment, and tools. Publishing promotes a tested agent version into an Agent Application with a stable invocation endpoint, RBAC, and deployment lifecycle. I would register and test first, then publish later.
+
+**Q: What is the difference between a code-owned MAF agent and the Foundry agent version?**
+
+The code-owned MAF pieces define how the project wants the agent to behave: instructions, governance, MCP boundaries, and adapter code. The Foundry agent version is the cloud-side version of that behavior inside the Foundry project. The code is still the source of truth; Foundry gives us managed runtime, versioning, evaluation, and operations.
 
 **Q: Why keep Foundry code isolated?**
 

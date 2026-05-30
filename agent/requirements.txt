@@ -4,6 +4,9 @@ pydantic
 pydantic-settings
 httpx
 python-dotenv
+agent-framework-foundry
+azure-ai-projects
+aiohttp
 azure-identity
 azure-keyvault-secrets
 azure-monitor-opentelemetry

@@ -32,6 +32,7 @@ def validate_environment(settings: Settings | None = None) -> EnvironmentValidat
 
     resolved_settings = settings or get_settings()
     checks = [
+        _check_agent_runtime_mode(resolved_settings),
         _check_mcp_mode(resolved_settings),
         _check_remote_mcp_endpoint(resolved_settings),
         _check_remote_mcp_auth(resolved_settings),
@@ -49,6 +50,22 @@ def validate_environment(settings: Settings | None = None) -> EnvironmentValidat
 
 def _remote_mcp_enabled(settings: Settings) -> bool:
     return not settings.mock_mcp and settings.mcp_execution_mode == "remote"
+
+
+def _check_agent_runtime_mode(settings: Settings) -> EnvironmentCheck:
+    runtime_mode = settings.agent_runtime_mode.lower()
+    if runtime_mode in {"local", "foundry"}:
+        return EnvironmentCheck(
+            name="agent_runtime_mode",
+            status="pass",
+            details=f"Agent runtime mode is configured for {runtime_mode}.",
+        )
+
+    return EnvironmentCheck(
+        name="agent_runtime_mode",
+        status="fail",
+        details="AGENT_RUNTIME_MODE must be local or foundry.",
+    )
 
 
 def _check_mcp_mode(settings: Settings) -> EnvironmentCheck:

@@ -41,12 +41,12 @@ def test_maf_agent_skeleton_validation_requires_foundry_runtime_settings() -> No
     assert "MODEL_DEPLOYMENT_NAME is required" in missing
 
 
-def test_maf_foundry_adapter_metadata_is_ready_but_not_active() -> None:
+def test_maf_foundry_adapter_metadata_is_live_planning_only() -> None:
     adapter = MafFoundryAgentAdapter()
 
     assert adapter.name == "enterprise-integration-agent"
     assert adapter.runtime == "microsoft_foundry"
-    assert adapter.implementation_status == "maf_skeleton_ready_not_active"
+    assert adapter.implementation_status == "live_foundry_invocation_planning_only"
 
 
 def test_maf_package_status_is_informational() -> None:

@@ -476,6 +476,7 @@ def test_operations_environment_endpoint_returns_validation_report() -> None:
     body = response.json()
     assert body["status"] == "ready"
     checks = {check["name"]: check for check in body["checks"]}
+    assert checks["agent_runtime_mode"]["status"] == "pass"
     assert checks["mcp_mode"]["status"] == "pass"
     assert checks["remote_mcp_endpoint"]["status"] == "skip"
     assert checks["remote_mcp_auth"]["status"] == "skip"

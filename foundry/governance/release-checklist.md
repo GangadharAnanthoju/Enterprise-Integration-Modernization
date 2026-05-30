@@ -4,6 +4,8 @@
 - Verify Foundry SDK and hosted agent runtime guidance.
 - Confirm the agent definition points to the current instruction file.
 - Confirm MAF registration preflight passes before live Foundry creation.
+- Confirm Foundry agent version `enterprise-integration-agent:1` is active before invocation work.
+- Confirm Foundry agent version `enterprise-integration-agent:1` responds to a safe test message.
 - Confirm publishing is deferred until invocation and evaluations pass.
 - Confirm Foundry-facing tool registration metadata matches the approved MCP registry.
 - Run unit and contract tests.

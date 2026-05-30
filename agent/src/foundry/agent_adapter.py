@@ -6,9 +6,11 @@ temporary rule-based planner.
 """
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Callable, Protocol
 
 from agent_app import AgentChatResult, handle_chat_message
+from config import Settings, get_settings
+from foundry.live_agent import FoundryAgentInvocationResult, invoke_foundry_agent_message
 from maf_runtime.enterprise_agent import build_enterprise_maf_agent_skeleton
 
 
@@ -53,11 +55,12 @@ class LocalRuleBasedAgentAdapter:
 
 @dataclass(frozen=True)
 class MafFoundryAgentAdapter:
-    """Future adapter for a Microsoft Agent Framework agent hosted in Foundry."""
+    """Adapter for a Microsoft Agent Framework agent registered in Foundry."""
 
     name: str = "enterprise-integration-agent"
     runtime: str = "microsoft_foundry"
-    implementation_status: str = "maf_skeleton_ready_not_active"
+    implementation_status: str = "live_foundry_invocation_planning_only"
+    runtime_invoker: Callable[[str], FoundryAgentInvocationResult] = invoke_foundry_agent_message
 
     def chat(
         self,
@@ -65,22 +68,34 @@ class MafFoundryAgentAdapter:
         correlation_id: str,
         simulate_when_ready: bool = False,
     ) -> AgentChatResult:
-        """Temporary compatibility path until live MAF invocation is enabled."""
+        """Invoke the live Foundry agent without crossing into backend execution."""
 
         build_enterprise_maf_agent_skeleton()
-        return handle_chat_message(
-            user_message=user_message,
+        foundry_result = self.runtime_invoker(user_message)
+        return AgentChatResult(
             correlation_id=correlation_id,
-            simulate_when_ready=simulate_when_ready,
+            status="foundry_response",
+            message=foundry_result.response_text,
+            tool_called=False,
+            selected_tool=None,
+            risk_decision=None,
+            approval_required=None,
+            entities={},
+            planned_action=None,
+            simulation_result=None,
+            approval_request=None,
         )
 
 
-def get_agent_adapter() -> AgentRuntimeAdapter:
+def get_agent_adapter(settings: Settings | None = None) -> AgentRuntimeAdapter:
     """Return the active agent runtime adapter.
 
-    Today this returns a local rule-based adapter. Later this factory can read
-    settings and return a Microsoft Foundry / Agent Framework adapter without
-    changing FastAPI routes or public API schemas.
+    Local remains the default. Set AGENT_RUNTIME_MODE=foundry to route chat
+    through the live Foundry agent while keeping backend execution disabled.
     """
+
+    resolved_settings = settings or get_settings()
+    if resolved_settings.agent_runtime_mode.lower() == "foundry":
+        return MafFoundryAgentAdapter(name=resolved_settings.foundry_agent_name)
 
     return LocalRuleBasedAgentAdapter()

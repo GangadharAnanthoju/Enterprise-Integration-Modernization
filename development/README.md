@@ -85,5 +85,10 @@ The goal is to make the AI project understandable from an Azure Integration Serv
 | 12D | Add local MAF agent skeleton | `step12/step-12d-local-maf-agent-skeleton.md` |
 | 12E | Plan Foundry invocation boundary | `step12/step-12e-foundry-invocation-boundary-plan.md` |
 | 12F | Finish Step 12 MAF and Foundry preparation | `step12/step-12f-step-12-completion.md` |
+| 13A | Add MAF Foundry package dependencies | `step13/step-13a-maf-foundry-package.md` |
+| 13B | Add live Foundry client boundary | `step13/step-13b-live-foundry-client.md` |
+| 13C | Create the first real Foundry agent version | `step13/step-13c-create-foundry-agent-version.md` |
+| 13D | Invoke the active Foundry agent version | `step13/step-13d-foundry-agent-invocation.md` |
+| 13E | Connect FastAPI to Foundry behind a runtime switch | `step13/step-13e-fastapi-foundry-runtime-switch.md` |
 | Azure setup | Environment variable guide for local and Azure settings | `azure-environment-setup.md` |
 | Local setup | Create a root Python virtual environment | `local-python-environment.md` |

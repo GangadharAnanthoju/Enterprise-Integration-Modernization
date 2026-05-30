@@ -76,9 +76,60 @@ It verifies:
 - the instruction file is present
 - approved tool metadata is complete
 
+## Live Registration Result
+
+Step 13 created the first real Foundry agent version.
+
+| Field | Value |
+|---|---|
+| Agent name | `enterprise-integration-agent` |
+| Version | `1` |
+| Status | `active` |
+| Model deployment | `gpt-4.1-mini` |
+| Definition kind | `prompt` |
+| Publishing status | not published |
+
+The agent version is now present in the Foundry project, but publishing is still intentionally deferred.
+
+## Invocation Plan
+
+Step 13D adds a Python invocation helper for the active agent version:
+
+```text
+agent/src/foundry/live_agent.py
+```
+
+The helper invokes `enterprise-integration-agent:1` through the Foundry runtime client. This validates the cloud-side agent response before FastAPI is switched to live Foundry invocation.
+
+Live invocation status:
+
+| Field | Value |
+|---|---|
+| Test message | `Check order ORD-1001` |
+| Result | agent responded successfully |
+| Response ID | `resp_0601a1fae2abb536006a1b02a2427c819097ecd9ee8023202d` |
+| Tool selected by agent response | `getOrderStatus` |
+| Execution posture | planning only; no Logic Apps execution from Foundry yet |
+
+## FastAPI Runtime Switch
+
+Step 13E adds:
+
+```text
+AGENT_RUNTIME_MODE=local
+```
+
+Supported modes:
+
+| Mode | Runtime | Backend execution |
+|---|---|---|
+| `local` | local rule-based adapter | existing MCP and Logic Apps path |
+| `foundry` | live Foundry agent invocation | planning only |
+
+This lets `/agent/chat` test the live Foundry agent without bypassing FastAPI governance.
+
 ## Not Included Yet
 
-- Live Foundry agent creation
 - Tool attachment in Foundry
 - Agent publishing
 - Agent Application RBAC

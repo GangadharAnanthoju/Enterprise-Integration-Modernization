@@ -4,9 +4,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     environment: str = "dev"
     agent_name: str = "enterprise-integration-agent"
+    agent_runtime_mode: str = "local"
     foundry_project_endpoint: str | None = None
     model_deployment_name: str | None = None
     foundry_agent_name: str = "enterprise-integration-agent"
+    foundry_agent_version: str | None = None
     foundry_eval_dataset_name: str = "enterprise-mcp-regression"
     azure_subscription_id: str | None = None
     azure_resource_group: str | None = None

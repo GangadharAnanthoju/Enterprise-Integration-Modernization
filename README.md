@@ -22,7 +22,28 @@ The solution is intentionally built in steps so each platform concern is easy to
 
 ## Local Development
 
-The project will support local demo mode without Azure by using:
+The Python agent service lives under `agent/`.
+
+Start the FastAPI API from the `agent` folder:
+
+```powershell
+cd C:\Data_AI\projects\Enterprise-Integration-Modernization\agent
+.\.venv\Scripts\Activate.ps1
+$env:PYTHONPATH="src"
+uvicorn src.main:app --reload --port 8001
+```
+
+Use `src.main:app` because `agent/src/main.py` creates the FastAPI application and includes the API router.
+
+The agent runtime can be switched with:
+
+```env
+AGENT_RUNTIME_MODE=local
+```
+
+Use `local` for the governed MCP/Logic Apps path. Use `foundry` only when you want `/agent/chat` to call the live Foundry agent in planning-only mode.
+
+The project supports local demo mode without Azure by using:
 
 ```env
 MOCK_MCP=true

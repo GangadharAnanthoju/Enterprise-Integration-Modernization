@@ -7,6 +7,7 @@ def test_validate_environment_passes_for_default_mock_mode() -> None:
 
     assert report.status == "ready"
     checks = {check.name: check for check in report.checks}
+    assert checks["agent_runtime_mode"].status == "pass"
     assert checks["mcp_mode"].status == "pass"
     assert checks["remote_mcp_endpoint"].status == "skip"
     assert checks["remote_mcp_auth"].status == "skip"
@@ -35,6 +36,7 @@ def test_validate_environment_passes_for_complete_remote_mcp_settings() -> None:
 
     checks = {check.name: check for check in report.checks}
     assert report.status == "ready"
+    assert checks["agent_runtime_mode"].status == "pass"
     assert checks["mcp_mode"].status == "pass"
     assert checks["remote_mcp_endpoint"].status == "pass"
     assert checks["remote_mcp_auth"].status == "pass"
@@ -72,6 +74,15 @@ def test_validate_environment_fails_for_inconsistent_mcp_mode() -> None:
     checks = {check.name: check for check in report.checks}
     assert report.status == "needs_attention"
     assert checks["mcp_mode"].status == "fail"
+
+
+def test_validate_environment_fails_for_unknown_agent_runtime_mode() -> None:
+    report = validate_environment(Settings(_env_file=None, agent_runtime_mode="portal"))
+
+    checks = {check.name: check for check in report.checks}
+    assert report.status == "needs_attention"
+    assert checks["agent_runtime_mode"].status == "fail"
+    assert checks["agent_runtime_mode"].details == "AGENT_RUNTIME_MODE must be local or foundry."
 
 
 def test_validate_environment_allows_local_logic_app_tool_endpoint_without_api_key() -> None:
