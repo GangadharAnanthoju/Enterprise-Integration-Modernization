@@ -2,6 +2,12 @@
 
 This folder captures the project build in small learning steps.
 
+For a high-level view of what is complete and what is pending, see:
+
+```text
+project-status-roadmap.md
+```
+
 The goal is to make the AI project understandable from an Azure Integration Services point of view:
 
 - Logic Apps workflows become MCP tools.
@@ -90,5 +96,13 @@ The goal is to make the AI project understandable from an Azure Integration Serv
 | 13C | Create the first real Foundry agent version | `step13/step-13c-create-foundry-agent-version.md` |
 | 13D | Invoke the active Foundry agent version | `step13/step-13d-foundry-agent-invocation.md` |
 | 13E | Connect FastAPI to Foundry behind a runtime switch | `step13/step-13e-fastapi-foundry-runtime-switch.md` |
+| 14A | Decide Foundry tool execution strategy | `step14/step-14a-foundry-tool-execution-strategy.md` |
+| 14B | Add structured Foundry plan contract | `step14/step-14b-structured-foundry-plan-contract.md` |
+| 14C | Update Foundry instructions for JSON planning | `step14/step-14c-foundry-json-planning-instructions.md` |
+| 14D | Verify live Foundry JSON plan output | `step14/step-14d-live-foundry-json-plan-verification.md` |
+| 14E | Parse Foundry JSON plans in the adapter | `step14/step-14e-foundry-adapter-parses-json-plan.md` |
+| 14F | Plan governed execution bridge for Foundry plans | `step14/step-14f-governed-execution-bridge-plan.md` |
+| 14G | Extract shared governance execution function | `step14/step-14g-shared-governance-execution-function.md` |
+| 14H | Route Foundry plans through shared governance | `step14/step-14h-foundry-plan-uses-shared-governance.md` |
 | Azure setup | Environment variable guide for local and Azure settings | `azure-environment-setup.md` |
 | Local setup | Create a root Python virtual environment | `local-python-environment.md` |

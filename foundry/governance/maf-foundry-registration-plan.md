@@ -83,7 +83,7 @@ Step 13 created the first real Foundry agent version.
 | Field | Value |
 |---|---|
 | Agent name | `enterprise-integration-agent` |
-| Version | `1` |
+| Version | `2` |
 | Status | `active` |
 | Model deployment | `gpt-4.1-mini` |
 | Definition kind | `prompt` |
@@ -106,10 +106,11 @@ Live invocation status:
 | Field | Value |
 |---|---|
 | Test message | `Check order ORD-1001` |
-| Result | agent responded successfully |
-| Response ID | `resp_0601a1fae2abb536006a1b02a2427c819097ecd9ee8023202d` |
+| Result | agent returned parseable JSON planning output |
+| Response ID | `resp_0e2b43a3d2fd2b05006a1cb620abdc8194bf405bce04ac66b1` |
 | Tool selected by agent response | `getOrderStatus` |
-| Execution posture | planning only; no Logic Apps execution from Foundry yet |
+| Parsed entities | `{"order_id": "ORD-1001"}` |
+| Execution posture | structured planning only; no Logic Apps execution from Foundry yet |
 
 ## FastAPI Runtime Switch
 
@@ -124,7 +125,7 @@ Supported modes:
 | Mode | Runtime | Backend execution |
 |---|---|---|
 | `local` | local rule-based adapter | existing MCP and Logic Apps path |
-| `foundry` | live Foundry agent invocation | planning only |
+| `foundry` | live Foundry agent invocation | structured planning only |
 
 This lets `/agent/chat` test the live Foundry agent without bypassing FastAPI governance.
 

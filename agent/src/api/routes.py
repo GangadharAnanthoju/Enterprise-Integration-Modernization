@@ -9,7 +9,7 @@ from approvals.requests import (
     get_approval_decision,
     get_approval_request,
 )
-from agent_app import AgentChatResult, PlannedAction
+from agent_contracts import AgentChatResult, PlannedAction
 from api.schemas import (
     AgentAdapterResponse,
     ApprovalDecisionRequest,

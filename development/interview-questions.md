@@ -178,6 +178,42 @@ I added `AGENT_RUNTIME_MODE`. In `local` mode, `/agent/chat` uses the existing l
 
 Because backend execution still needs policy enforcement, approval checks, audit events, and MCP envelope validation. Until the Foundry tool attachment pattern is finalized, FastAPI remains the enforcement point and Foundry mode is used to validate real agent reasoning safely.
 
+**Q: Should the Foundry agent call Logic Apps directly?**
+
+Not at this stage. For this enterprise integration pattern, Foundry should produce a structured action plan, and FastAPI should validate that plan against the approved tool registry, required entities, risk policy, and approval state before MCP calls Logic Apps. This prevents the agent from bypassing governance or exposing workflow callback URLs too close to the chat layer.
+
+**Q: What is the tool execution strategy after adding the live Foundry agent?**
+
+The strategy is: Foundry reasons, FastAPI governs, MCP executes, and Logic Apps integrates. The Foundry agent proposes the selected tool and entities. FastAPI independently validates the proposal and only then allows MCP execution when policy permits it.
+
+**Q: Why do you need a structured Foundry plan contract?**
+
+Free-form model text is not safe enough to drive backend execution. The structured plan contract makes the agent return fields like selected tool, extracted entities, clarification requirement, confidence, and reason. Backend code can then validate that object against the approved registry and required entities before any MCP call is allowed.
+
+**Q: Why update the Foundry instructions after defining the plan contract?**
+
+The code contract and prompt instructions need to agree. The parser expects a JSON object, so the Foundry instructions now explicitly ask for JSON-only planning output with `selected_tool`, `entities`, `requires_clarification`, `clarification_question`, `confidence`, and `reason`. That reduces ambiguity before we create a new agent version.
+
+**Q: How did you prove the live Foundry agent follows the structured plan contract?**
+
+I created a new Foundry agent version, `enterprise-integration-agent:2`, using the updated instructions. Then I invoked it with `Check order ORD-1001`. The live response returned JSON with `selected_tool=getOrderStatus` and `entities.order_id=ORD-1001`, and the backend parser validated it as ready for governance.
+
+**Q: What changed when the Foundry adapter started parsing JSON plans?**
+
+The Foundry adapter no longer returns only raw model text. It parses the JSON response, validates it, checks the selected tool against the registry, evaluates risk policy, and returns the same `PlannedAction` shape that FastAPI already uses. Tool execution is still disabled in Foundry mode until the governance execution path is connected.
+
+**Q: Why should local mode and Foundry mode share the same execution function?**
+
+Because governance should not depend on which agent runtime produced the plan. The local planner and the Foundry agent should both feed the same backend execution path for required entities, risk policy, approvals, audit events, MCP payload construction, and Logic Apps execution. That prevents two different policy implementations from drifting apart.
+
+**Q: What changed when you extracted `execute_planned_action`?**
+
+I moved selected-tool governance from the local rule-based chat function into a shared backend function. The local shell still detects intent and extracts entities, but approval checks, risk policy, missing entity validation, and MCP execution now live in one reusable module that Foundry mode can call later.
+
+**Q: What changed when Foundry mode started using `execute_planned_action`?**
+
+Foundry became part of the real governed execution flow. It still only proposes a structured plan, but that plan now goes through the same backend function as local mode. Low-risk ready plans can execute through MCP when requested, missing data is blocked, and high-risk plans create approval requests.
+
 **Q: What is the difference between registering and publishing a Foundry agent?**
 
 Registration creates or updates the agent inside the Foundry project so it can be tested with instructions, model deployment, and tools. Publishing promotes a tested agent version into an Agent Application with a stable invocation endpoint, RBAC, and deployment lifecycle. I would register and test first, then publish later.

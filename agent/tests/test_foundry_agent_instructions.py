@@ -18,6 +18,8 @@ def test_foundry_agent_instructions_capture_governance_rules() -> None:
     assert "high-risk tools must not execute directly from chat" in instructions
     assert "approval is recorded" in instructions
     assert "correlation id" in instructions
+    assert "return only one json object" in instructions
+    assert "do not claim that a backend workflow was executed" in instructions
 
 
 def test_foundry_agent_instructions_name_current_tool_examples() -> None:
@@ -29,3 +31,15 @@ def test_foundry_agent_instructions_name_current_tool_examples() -> None:
     assert "`queryIntegrationRunStatus`" in instructions
     assert "`sendSupplierNotification`" in instructions
     assert "`createServiceNowTicket`" in instructions
+
+
+def test_foundry_agent_instructions_define_structured_plan_fields() -> None:
+    instructions = INSTRUCTIONS_PATH.read_text(encoding="utf-8")
+
+    assert '"selected_tool"' in instructions
+    assert '"entities"' in instructions
+    assert '"requires_clarification"' in instructions
+    assert '"clarification_question"' in instructions
+    assert '"confidence"' in instructions
+    assert '"reason"' in instructions
+    assert "low`, `medium`, or `high`" in instructions
