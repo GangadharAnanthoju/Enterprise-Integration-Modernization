@@ -104,5 +104,8 @@ The goal is to make the AI project understandable from an Azure Integration Serv
 | 14F | Plan governed execution bridge for Foundry plans | `step14/step-14f-governed-execution-bridge-plan.md` |
 | 14G | Extract shared governance execution function | `step14/step-14g-shared-governance-execution-function.md` |
 | 14H | Route Foundry plans through shared governance | `step14/step-14h-foundry-plan-uses-shared-governance.md` |
+| 15A | Plan Foundry evaluation dataset strategy | `step15/step-15a-foundry-evaluation-plan.md` |
+| 15B | Export local evaluation cases as Foundry-ready JSONL | `step15/step-15b-foundry-evaluation-jsonl-export.md` |
+| 15C | Finish Step 15 evaluation foundation | `step15/step-15c-step-15-completion.md` |
 | Azure setup | Environment variable guide for local and Azure settings | `azure-environment-setup.md` |
 | Local setup | Create a root Python virtual environment | `local-python-environment.md` |

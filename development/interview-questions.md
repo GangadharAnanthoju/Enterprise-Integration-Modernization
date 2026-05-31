@@ -214,6 +214,26 @@ I moved selected-tool governance from the local rule-based chat function into a 
 
 Foundry became part of the real governed execution flow. It still only proposes a structured plan, but that plan now goes through the same backend function as local mode. Low-risk ready plans can execute through MCP when requested, missing data is blocked, and high-risk plans create approval requests.
 
+**Q: Why move local evaluation cases into Foundry-ready datasets?**
+
+Because the evaluation cases become release evidence. The same safety cases that prove local behavior can be exported to a Foundry dataset and run against future agent versions. That gives us repeatable checks for tool selection, missing entities, high-risk approval gating, unsupported requests, and JSON plan validity.
+
+**Q: What would you evaluate before releasing an enterprise agent?**
+
+I would evaluate the agent at three layers. First, the planning contract: valid JSON, correct tool selection, correct entities, and no invented tools. Second, the governed outcome: missing entities are blocked, high-risk actions require approval, and unsupported requests do not execute. Third, the integration path: MCP payload shape, correlation ID propagation, Logic Apps response handling, and safe error behavior.
+
+**Q: Why evaluate structured plans separately from backend execution?**
+
+Structured-plan evaluation is cheaper, safer, and faster because it checks the agent's reasoning without touching backend workflows. Backend execution tests are still needed, but they should run after the plan is proven valid and should be controlled because they may call Logic Apps, create tickets, or trigger real business processes.
+
+**Q: How do local safety tests map to Foundry evaluations?**
+
+The local tests become the seed dataset for Foundry evaluations. Each case captures a user request, expected tool, expected entities, expected governance decision, and expected execution behavior. That lets future Foundry agent versions be tested against the same safety expectations before promotion.
+
+**Q: Why commit evaluation cases as JSONL instead of keeping them only in test code?**
+
+JSONL makes the expected behavior reviewable as a data asset. Engineers, architects, and governance reviewers can inspect the release cases without reading Python test code, and the same file can later be uploaded or adapted for Foundry evaluation runs.
+
 **Q: What is the difference between registering and publishing a Foundry agent?**
 
 Registration creates or updates the agent inside the Foundry project so it can be tested with instructions, model deployment, and tools. Publishing promotes a tested agent version into an Agent Application with a stable invocation endpoint, RBAC, and deployment lifecycle. I would register and test first, then publish later.

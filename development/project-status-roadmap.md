@@ -1,10 +1,10 @@
 # Enterprise Integration Modernization - Project Status Roadmap
 
-Last updated: 2026-05-30
+Last updated: 2026-05-31
 
 ## Current Position
 
-We have completed through **Step 13** and started **Step 14**.
+We have completed through **Step 15**.
 
 The project now has:
 
@@ -14,9 +14,11 @@ The project now has:
 - MCP request building and execution boundaries
 - local Logic Apps Standard workflows acting as MCP tool endpoints
 - Microsoft Foundry agent instructions and governance artifacts
-- a real Foundry agent version: `enterprise-integration-agent:1`
-- live Foundry invocation from Python
-- a FastAPI runtime switch between local and Foundry planning modes
+- a real Foundry agent version: `enterprise-integration-agent:2`
+- live Foundry JSON planning from Python
+- a FastAPI runtime switch between local and Foundry modes
+- shared governed execution for local and Foundry plans
+- a Foundry-ready JSONL evaluation dataset exported from local safety cases
 
 ## Current Architecture
 
@@ -28,7 +30,8 @@ User / UI
           -> governed MCP execution
           -> local Logic Apps workflows
        -> live Foundry agent
-          -> planning-only response
+          -> JSON plan
+          -> shared governed execution
 ```
 
 The current safe default is:
@@ -43,7 +46,7 @@ Foundry mode is available for planning tests:
 AGENT_RUNTIME_MODE=foundry
 ```
 
-In Foundry mode, backend execution is intentionally disabled for now.
+In Foundry mode, ready low-risk plans can now execute through the same governed MCP path as local mode when `simulate_when_ready=true`.
 
 ## Completed Milestones
 
@@ -61,9 +64,11 @@ In Foundry mode, backend execution is intentionally disabled for now.
 | Logic Apps local workflows | Done | Local workflows for order, shipment, invoice, run status, and high-risk actions |
 | Foundry preparation | Done | Agent definition, instructions, tool metadata, readiness checks |
 | MAF preparation | Done | Local Microsoft Agent Framework-shaped skeleton |
-| Live Foundry agent | Done | Created `enterprise-integration-agent:1` |
+| Live Foundry agent | Done | Created `enterprise-integration-agent:2` |
 | Live Foundry invocation | Done | Invoked active Foundry agent version from Python |
-| FastAPI runtime switch | Done | `/agent/chat` can use local mode or Foundry planning mode |
+| FastAPI runtime switch | Done | `/agent/chat` can use local or Foundry mode |
+| Shared governance execution | Done | Local and Foundry plans use shared backend governance |
+| Foundry evaluation foundation | Done | Local safety cases exported into Foundry-ready JSONL |
 
 ## Step Summary
 
@@ -81,11 +86,13 @@ In Foundry mode, backend execution is intentionally disabled for now.
 | 11 | Foundry agent architecture, instructions, and tool metadata | Complete |
 | 12 | Real Foundry resource plan and MAF skeleton | Complete |
 | 13 | Live Foundry agent creation, invocation, and FastAPI switch | Complete |
+| 14 | Foundry JSON planning and governed execution bridge | Complete |
+| 15 | Foundry evaluation dataset strategy and JSONL export | Complete |
 
 ## Most Recent Commit
 
 ```text
-9c0e713 Complete Foundry live invocation step 13
+52b94c0 Complete Foundry governed execution step 14
 ```
 
 This commit was pushed to:
@@ -96,117 +103,29 @@ origin/dev
 
 ## What Is Pending
 
-### Step 14 - Foundry Tool Execution Strategy
+### Step 15 - Foundry Evaluations
 
-Decide how the live Foundry agent should connect to governed tools.
+Completed moving local safety cases toward Foundry-ready evaluation assets.
 
-Recommended direction:
-
-```text
-Foundry Agent
-  -> produces structured plan
-  -> FastAPI validates and enforces governance
-  -> MCP executor calls Logic Apps
-```
-
-Why:
-
-- Foundry stays first-class for reasoning.
-- FastAPI remains the enterprise control plane.
-- MCP remains the backend execution boundary.
-- Logic Apps callback URLs and secrets stay out of the agent/UI.
-- Risk policy and approvals remain enforceable in backend code.
-
-Step 14A is documented in:
+Current asset:
 
 ```text
-development/step14/step-14a-foundry-tool-execution-strategy.md
+foundry/evaluations/datasets/enterprise-mcp-regression.jsonl
 ```
 
-Step 14B adds the first structured plan contract in:
+Step 15 documentation:
 
 ```text
-agent/src/foundry/planning.py
-development/step14/step-14b-structured-foundry-plan-contract.md
+development/step15/step-15a-foundry-evaluation-plan.md
+development/step15/step-15b-foundry-evaluation-jsonl-export.md
+development/step15/step-15c-step-15-completion.md
 ```
 
-Step 14C updates the Foundry instructions to request JSON planning output:
+The dataset is generated from:
 
 ```text
-agent/src/prompts/foundry_agent_instructions.md
-development/step14/step-14c-foundry-json-planning-instructions.md
+agent/src/foundry/evaluation_export.py
 ```
-
-Step 14D created and verified the live JSON-planning Foundry version:
-
-```text
-enterprise-integration-agent:2
-development/step14/step-14d-live-foundry-json-plan-verification.md
-```
-
-Live verification result:
-
-```text
-selected_tool=getOrderStatus
-entities={"order_id": "ORD-1001"}
-ready_for_governance=true
-```
-
-Step 14E connects the Foundry adapter to the parser:
-
-```text
-AGENT_RUNTIME_MODE=foundry
-  -> live Foundry response
-  -> parse_foundry_action_plan
-  -> PlannedAction response
-  -> no backend execution yet
-```
-
-Step 14F documents the governed execution bridge:
-
-```text
-Foundry PlannedAction
-  -> shared FastAPI governance
-  -> MCP executor
-  -> Logic Apps workflow
-```
-
-Implementation is still pending. The next code step should extract the local governance execution flow into a shared function so local and Foundry modes use the same enforcement logic.
-
-Step 14G extracts that shared function:
-
-```text
-agent/src/agent_contracts.py
-agent/src/agent_execution.py
-```
-
-Local mode now routes selected tools through `execute_planned_action`. Foundry mode still stops at structured planning until the next step connects it to the same function.
-
-Step 14H connects Foundry mode to the same function:
-
-```text
-Foundry JSON plan
-  -> execute_planned_action
-  -> missing entity, approval, or MCP execution
-```
-
-Live Step 14H verification:
-
-```text
-AGENT_RUNTIME_MODE=foundry
-FOUNDRY_AGENT_VERSION=2
-message="Check order ORD-1001"
-status=completed
-tool_called=true
-selected_tool=getOrderStatus
-mcp_mode=mock
-```
-
-### Step 15 - Complete Step 14 And Commit
-
-Step 14 now has a substantial set of code, docs, live Foundry changes, and tests.
-
-Before moving to Azure deployment or evaluations, commit and push the Step 14 milestone.
 
 ### Step 16 - Azure Logic Apps Deployment
 
@@ -220,19 +139,7 @@ Pending decisions:
 - Key Vault or app settings
 - APIM or direct internal endpoint
 
-### Step 17 - Foundry Evaluations
-
-Move local evaluation cases into Foundry evaluation assets.
-
-Focus areas:
-
-- tool selection accuracy
-- missing entity behavior
-- high-risk approval gating
-- unsupported request handling
-- response consistency
-
-### Step 18 - Production Hardening
+### Step 17 - Production Hardening
 
 Future enterprise hardening:
 
@@ -250,13 +157,13 @@ Future enterprise hardening:
 Start:
 
 ```text
-Step 14H - Foundry Plan Uses Shared Governance Execution
+Step 16A - Azure Logic Apps Deployment Resource Review
 ```
 
 First implementation target:
 
 ```text
-agent/src/foundry/agent_adapter.py
+development/step16/step-16a-azure-logic-apps-deployment-plan.md
 ```
 
-The goal is to let Foundry mode call `execute_planned_action` after successful JSON plan parsing.
+The goal is to decide whether and how to deploy the local Logic Apps Standard project into Azure without creating unnecessary cost.
