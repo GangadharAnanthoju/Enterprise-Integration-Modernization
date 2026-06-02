@@ -6,13 +6,6 @@ from typing import Any
 from audit.events import AuditEvent
 
 
-# **************** KEEP: FOUNDRY TRACE PROJECTION ****************
-# This module maps local audit events to Foundry-style trace records. Later it
-# can emit real traces to Microsoft Foundry or OpenTelemetry without changing
-# the governed workflow code.
-# ***************************************************************
-
-
 @dataclass(frozen=True)
 class FoundryTraceRecord:
     """Trace-shaped view of one governed agent workflow event."""

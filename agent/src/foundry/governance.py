@@ -18,12 +18,6 @@ from tools.registry import list_tools
 from tools.risk_policy import evaluate_tool_name
 
 
-# **************** KEEP: OPERATIONAL READINESS CHECKS ****************
-# These local checks are a lightweight stand-in for production readiness gates.
-# Later they can feed deployment checks, Foundry monitoring, or CI/CD policy.
-# *******************************************************************
-
-
 @dataclass(frozen=True)
 class ReadinessCheck:
     """One operational readiness check result."""
@@ -99,7 +93,7 @@ def _check_approval_store() -> ReadinessCheck:
         return ReadinessCheck(
             name="approval_store",
             status="pass",
-            details="Temporary approval request and decision stores are available.",
+            details="Local approval request and decision stores are available.",
         )
 
     return ReadinessCheck(
@@ -114,7 +108,7 @@ def _check_audit_store() -> ReadinessCheck:
         return ReadinessCheck(
             name="audit_store",
             status="pass",
-            details="Temporary audit event store is available.",
+            details="Local audit event store is available.",
         )
 
     return ReadinessCheck(

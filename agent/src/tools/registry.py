@@ -3,15 +3,8 @@
 from tools.contracts import RiskLevel, ToolContract
 
 
-# **************** TEMPORARY STATIC REGISTRY, KEEP THE PATTERN ****************
-# This Python dictionary is active now for learning and tests. Later it may move
-# to configuration, a database, API Management, or Foundry-connected catalog.
-# The important pattern stays: the agent chooses only approved MCP tools.
-# **************************************************************************
-
-
-# This is the approved enterprise MCP tool catalog.
-# The future agent can choose from this list, but it should not invent tools.
+# Approved enterprise MCP tool catalog. The agent can choose from this list,
+# but it must not invent tools outside this registry.
 TOOL_REGISTRY: dict[str, ToolContract] = {
     "getOrderStatus": ToolContract(
         name="getOrderStatus",
@@ -117,7 +110,6 @@ TOOL_REGISTRY: dict[str, ToolContract] = {
 def list_tools() -> list[ToolContract]:
     """Return approved tools sorted by name for stable API responses and tests."""
 
-    # KEEP: stable ordering helps tests, demos, and frontend rendering.
     # Sorting keeps API responses predictable for tests, demos, and documentation.
     return [TOOL_REGISTRY[name] for name in sorted(TOOL_REGISTRY)]
 
@@ -125,7 +117,6 @@ def list_tools() -> list[ToolContract]:
 def get_tool(tool_name: str) -> ToolContract | None:
     """Return one tool contract by exact MCP tool name."""
 
-    # KEEP: exact-name lookup prevents fuzzy or invented tool execution.
     return TOOL_REGISTRY.get(tool_name)
 
 

@@ -69,12 +69,6 @@ from tools.risk_policy import RiskDecision, evaluate_tool_risk
 router = APIRouter()
 
 
-# **************** KEEP: API MAPPING LAYER ****************
-# These mapper functions protect the public API from internal class changes.
-# Keep this pattern when Foundry, persistence, or real MCP calls are added.
-# *********************************************************
-
-
 def _to_approval_request_response(
     approval_request: ApprovalRequest | None,
 ) -> ApprovalRequestResponse | None:
@@ -306,10 +300,8 @@ def _to_risk_decision_response(decision: RiskDecision) -> RiskDecisionResponse:
 
 
 def _to_simulation_response(result: McpSimulationResult) -> ToolSimulationResponse:
-    """Convert a mock MCP result into the public API response shape."""
+    """Convert an MCP execution result into the public API response shape."""
 
-    # TEMPORARY INPUT SOURCE: McpSimulationResult currently comes from the local
-    # mock adapter. Later this mapper can accept a real MCP result object.
     return ToolSimulationResponse(
         tool_name=result.tool_name,
         correlation_id=result.correlation_id,
@@ -464,7 +456,7 @@ async def chat_with_agent(request: AgentChatRequest) -> AgentChatResponse:
     # Route through an adapter so a Foundry/Agent Framework runtime can replace
     # the local rule-based shell without changing this API endpoint.
     # Resolve correlation once at the API boundary so planning, approval, and
-    # MCP simulation can all share the same trace identifier.
+    # MCP execution can share the same trace identifier.
     correlation_id = resolve_correlation_id(request.correlation_id)
     agent_adapter = get_agent_adapter()
     result = agent_adapter.chat(
@@ -652,10 +644,9 @@ async def simulate_tool(
     tool_name: str,
     request: ToolSimulationRequest | None = Body(default=None),
 ) -> ToolSimulationResponse:
-    """Simulate one approved MCP tool using local sample data."""
+    """Execute one approved MCP tool through the configured MCP runtime."""
 
-    # TEMPORARY ENDPOINT: useful for learning and tests. Later this can become
-    # an integration test helper or call the real Logic Apps MCP server.
+    # This endpoint is useful for learning, diagnostics, and integration tests.
     tool = get_tool(tool_name)
     if tool is None:
         raise HTTPException(status_code=404, detail=f"Tool not found: {tool_name}")

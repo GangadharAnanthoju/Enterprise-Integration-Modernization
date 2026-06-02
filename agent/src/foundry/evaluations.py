@@ -5,12 +5,6 @@ from dataclasses import dataclass
 from agent_app import handle_chat_message
 
 
-# **************** KEEP: LOCAL FOUNDRY EVAL SEED ****************
-# These cases are local smoke/regression examples for now. Later they can be
-# exported into Foundry evaluation datasets and run against the hosted agent.
-# ***************************************************************
-
-
 @dataclass(frozen=True)
 class EvaluationExpectedOutcome:
     """Expected governed behavior for one natural-language agent request."""
@@ -62,7 +56,7 @@ EVALUATION_CASES: tuple[EvaluationCase, ...] = (
             tool_called=True,
             approval_request_created=False,
         ),
-        expected_behavior="Select getOrderStatus, extract order_id, and simulate because risk allows it.",
+        expected_behavior="Select getOrderStatus, extract order_id, and execute because risk allows it.",
     ),
     EvaluationCase(
         case_id="eval-order-missing-id",
@@ -77,7 +71,7 @@ EVALUATION_CASES: tuple[EvaluationCase, ...] = (
             tool_called=False,
             approval_request_created=False,
         ),
-        expected_behavior="Select getOrderStatus but block simulation because order_id is missing.",
+        expected_behavior="Select getOrderStatus but block execution because order_id is missing.",
     ),
     EvaluationCase(
         case_id="eval-supplier-approval",

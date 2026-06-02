@@ -15,7 +15,7 @@ def test_agent_adapter_wraps_current_rule_based_agent_shell() -> None:
 
     assert adapter.name == "local-rule-based-agent"
     assert adapter.runtime == "local"
-    assert adapter.implementation_status == "temporary_rule_based"
+    assert adapter.implementation_status == "local_deterministic_planner"
     assert result.correlation_id == "adapter-corr-001"
     assert result.status == "completed"
     assert result.selected_tool == "getOrderStatus"

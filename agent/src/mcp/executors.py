@@ -1,7 +1,7 @@
 """MCP execution adapters.
 
 The client builds validated MCP requests. Executors decide how those requests
-are fulfilled: local sample data today, remote Logic Apps Standard MCP later.
+are fulfilled: local sample data for offline tests or remote Logic Apps MCP.
 """
 
 import json
@@ -37,7 +37,7 @@ class McpExecutorDiagnostics:
 
 
 class McpExecutor(Protocol):
-    """Stable execution interface for mock and remote MCP runtimes."""
+    """Stable execution interface for local and remote MCP runtimes."""
 
     mode: McpExecutionMode
 
@@ -58,20 +58,20 @@ class MockMcpExecutor:
             mode=self.mode.value,
             status="completed",
             result=_load_sample_response(tool),
-            message="Tool simulation completed using the local sample response.",
+            message="Tool execution completed using the local sample response.",
         )
 
 
 @dataclass(frozen=True)
 class RemoteMcpExecutor:
-    """Placeholder for future Logic Apps Standard MCP execution."""
+    """Remote executor for managed Logic Apps Standard MCP execution."""
 
     config: McpServerConfig
     http_client: RemoteMcpHttpClient | None = None
     mode: McpExecutionMode = McpExecutionMode.REMOTE
 
     def execute(self, tool: ToolContract, request: McpToolRequest | None) -> McpExecutionOutput:
-        """Fail safely until the real remote MCP transport is implemented."""
+        """Execute one approved tool through the remote MCP transport."""
 
         if request is None:
             raise RemoteMcpConfigurationError(self.config.server_name)

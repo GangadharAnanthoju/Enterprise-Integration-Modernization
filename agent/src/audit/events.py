@@ -4,12 +4,6 @@ from dataclasses import dataclass
 from typing import Any
 
 
-# **************** TEMPORARY AUDIT STORE ****************
-# Active now for local learning and tests. Later this should write to durable
-# storage and/or Azure Monitor/Application Insights with the same event fields.
-# *******************************************************
-
-
 @dataclass(frozen=True)
 class AuditEvent:
     """One auditable state transition in the governed agent workflow."""
@@ -22,6 +16,8 @@ class AuditEvent:
     details: dict[str, Any]
 
 
+# Local audit store used by the API and tests. Production hardening can swap
+# this behind the same functions for durable storage and Azure Monitor export.
 AUDIT_EVENTS: list[AuditEvent] = []
 
 

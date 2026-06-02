@@ -25,7 +25,7 @@ def test_foundry_agent_definition_points_to_instruction_source() -> None:
     assert "backendImplementation: Logic Apps Standard workflows" in definition
 
 
-def test_foundry_agent_definition_lists_approved_tool_placeholders() -> None:
+def test_foundry_agent_definition_lists_approved_tool_entries() -> None:
     definition = AGENT_DEFINITION_PATH.read_text(encoding="utf-8")
 
     assert "name: getOrderStatus" in definition

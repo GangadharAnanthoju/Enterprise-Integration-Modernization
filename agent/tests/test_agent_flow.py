@@ -64,7 +64,7 @@ def test_foundry_agent_adapter_endpoint_returns_active_runtime_boundary() -> Non
     assert response.json() == {
         "name": "local-rule-based-agent",
         "runtime": "local",
-        "implementation_status": "temporary_rule_based",
+        "implementation_status": "local_deterministic_planner",
     }
 
 

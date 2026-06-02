@@ -3,13 +3,6 @@
 from dataclasses import dataclass
 
 
-# **************** TEMPORARY APPROVAL STORE ****************
-# These approval classes are active now, but they are intentionally lightweight.
-# Later they should move behind a real approval workflow, database, or Logic
-# Apps-backed approval service while preserving the API response shape.
-# *******************************************************
-
-
 @dataclass(frozen=True)
 class ApprovalRequest:
     """Approval task created when a high-risk action is ready but blocked."""
@@ -35,8 +28,8 @@ class ApprovalDecision:
     comment: str | None
 
 
-# TEMPORARY STORAGE: dictionaries keep approvals available across requests
-# during local development. Replace this with persistent storage later.
+# Local approval store. Production hardening can replace this with persistent
+# storage or a Logic Apps approval workflow while preserving the API shape.
 APPROVAL_REQUESTS: dict[str, ApprovalRequest] = {}
 APPROVAL_DECISIONS: dict[str, ApprovalDecision] = {}
 
@@ -50,9 +43,7 @@ def create_approval_request(
 ) -> ApprovalRequest:
     """Create a pending approval request for a blocked high-risk action."""
 
-    # This is in-memory and deterministic for now so tests and demos can make
-    # clear assertions. A later step can persist approvals in a database or
-    # call a real approval workflow service.
+    # Deterministic IDs make tests, demos, and audit lookups easy to follow.
     approval_request = ApprovalRequest(
         approval_id=f"apr-{correlation_id}",
         correlation_id=correlation_id,

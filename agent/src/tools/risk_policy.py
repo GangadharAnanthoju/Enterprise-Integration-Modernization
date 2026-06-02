@@ -7,13 +7,6 @@ from tools.contracts import RiskLevel, ToolContract
 from tools.registry import require_tool
 
 
-# **************** KEEP: ENTERPRISE RISK POLICY ****************
-# This module should remain even after the real agent is implemented. The rules
-# may move to external policy configuration later, but every tool execution path
-# should still ask for a RiskDecision before running.
-# **************************************************************
-
-
 class ExecutionDecision(StrEnum):
     """Decision returned before an MCP tool can run."""
 
@@ -75,5 +68,4 @@ def evaluate_tool_risk(tool: ToolContract) -> RiskDecision:
 def evaluate_tool_name(tool_name: str) -> RiskDecision:
     """Evaluate a tool by registered MCP tool name."""
 
-    # KEEP: convenience wrapper for tests and callers that start from tool name.
     return evaluate_tool_risk(require_tool(tool_name))

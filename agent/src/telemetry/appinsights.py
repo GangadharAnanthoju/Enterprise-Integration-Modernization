@@ -6,12 +6,6 @@ from typing import Any
 from foundry.tracing import FoundryTraceRecord
 
 
-# **************** TEMPORARY APP INSIGHTS PROJECTION ****************
-# Active now as a local envelope builder. Later this module can send these
-# events through Azure Monitor OpenTelemetry or the Application Insights SDK.
-# ***************************************************************
-
-
 @dataclass(frozen=True)
 class AppInsightsCustomEvent:
     """Application Insights custom event-shaped view of a trace record."""

@@ -5,13 +5,6 @@ from enum import StrEnum
 from typing import Any
 
 
-# **************** KEEP: MCP BOUNDARY CONTRACTS ****************
-# These local request shapes are the bridge between agent planning and real MCP
-# calls. Later the transport can change, but the adapter should still build an
-# explicit payload from approved tool metadata and validated entities.
-# **************************************************************
-
-
 @dataclass(frozen=True)
 class McpToolRequest:
     """Request payload prepared for one approved MCP tool call."""
@@ -62,7 +55,7 @@ class McpServerConfig:
 
 @dataclass(frozen=True)
 class McpRemoteRequestEnvelope:
-    """Transport envelope for a future remote MCP server call."""
+    """Transport envelope for a remote MCP server call."""
 
     server_name: str
     endpoint_url: str
@@ -72,7 +65,7 @@ class McpRemoteRequestEnvelope:
     timeout_seconds: int
 
     def to_http_json(self) -> dict[str, Any]:
-        """Return the JSON body expected by the future remote MCP transport."""
+        """Return the tool argument body sent through the MCP transport."""
 
         return {
             "server_name": self.server_name,

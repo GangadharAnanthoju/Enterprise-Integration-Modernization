@@ -21,16 +21,9 @@ TOOL_ENDPOINT_SETTING_NAMES: dict[str, str] = {
 }
 
 
-# **************** TEMPORARY MOCK MCP ADAPTER ****************
-# This module is active now for local simulation. After the real enterprise MCP
-# server exists, replace sample-file loading with remote MCP tool calls while
-# keeping risk checks and correlation IDs.
-# ************************************************************
-
-
 @dataclass(frozen=True)
 class McpSimulationResult:
-    """Result returned by local mock MCP simulation."""
+    """Normalized result returned by local or remote MCP execution."""
 
     tool_name: str
     correlation_id: str
@@ -110,7 +103,7 @@ def simulate_mcp_tool(
     correlation_id: str,
     entities: dict[str, str] | None = None,
 ) -> McpSimulationResult:
-    """Simulate an MCP tool call without connecting to Azure."""
+    """Execute an MCP tool request when governance allows it."""
 
     mcp_request = (
         build_mcp_request(tool, entities, correlation_id)
@@ -118,8 +111,8 @@ def simulate_mcp_tool(
         else None
     )
 
-    # KEEP: high-risk tools must stop here too. Even direct simulation endpoint
-    # calls should respect the same policy as the chat flow.
+    # High-risk tools must stop here too. Direct execution helper calls should
+    # respect the same policy as the chat flow.
     if risk_decision.decision == ExecutionDecision.REQUIRE_APPROVAL:
         return McpSimulationResult(
             tool_name=tool.name,
@@ -130,7 +123,7 @@ def simulate_mcp_tool(
             approval_required=True,
             request=mcp_request,
             result=None,
-            message="Tool simulation stopped because this action requires approval.",
+            message="Tool execution stopped because this action requires approval.",
         )
 
     executor = get_mcp_executor(load_mcp_config())
@@ -155,7 +148,7 @@ def simulate_mcp_tool_after_approval(
     approval_id: str,
     entities: dict[str, str] | None = None,
 ) -> McpSimulationResult:
-    """Simulate a high-risk MCP tool only after approval is recorded."""
+    """Execute a high-risk MCP tool only after approval is recorded."""
 
     mcp_request = (
         build_mcp_request(tool, entities, correlation_id)
@@ -163,9 +156,8 @@ def simulate_mcp_tool_after_approval(
         else None
     )
 
-    # EXPLICIT APPROVAL PATH: this is the only place high-risk tools can move
-    # past require_approval in local simulation. Direct tool simulation remains
-    # blocked by simulate_mcp_tool().
+    # Explicit approval path: this is the only place high-risk tools can move
+    # past require_approval. Direct tool execution remains blocked above.
     executor = get_mcp_executor(load_mcp_config())
     execution_output = executor.execute(tool, mcp_request)
     return McpSimulationResult(

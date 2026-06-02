@@ -1,8 +1,7 @@
 """Agent runtime adapter boundary.
 
-This module is the replacement point for the future Microsoft Foundry-hosted
-agent. FastAPI should depend on this adapter contract, not directly on the
-temporary rule-based planner.
+FastAPI depends on this adapter contract instead of binding directly to a
+specific local or Foundry planning implementation.
 """
 
 from dataclasses import dataclass
@@ -22,7 +21,7 @@ from maf_runtime.enterprise_agent import build_enterprise_maf_agent_skeleton
 
 
 class AgentRuntimeAdapter(Protocol):
-    """Stable interface for local and future Foundry agent runtimes."""
+    """Stable interface for local and Foundry agent runtimes."""
 
     name: str
     runtime: str
@@ -39,11 +38,11 @@ class AgentRuntimeAdapter(Protocol):
 
 @dataclass(frozen=True)
 class LocalRuleBasedAgentAdapter:
-    """Temporary adapter around the learning-project rule-based agent shell."""
+    """Adapter around the transparent local rule-based planner."""
 
     name: str = "local-rule-based-agent"
     runtime: str = "local"
-    implementation_status: str = "temporary_rule_based"
+    implementation_status: str = "local_deterministic_planner"
 
     def chat(
         self,
@@ -131,7 +130,7 @@ def get_agent_adapter(settings: Settings | None = None) -> AgentRuntimeAdapter:
     """Return the active agent runtime adapter.
 
     Local remains the default. Set AGENT_RUNTIME_MODE=foundry to route chat
-    through the live Foundry agent while keeping backend execution disabled.
+    through the live Foundry planner while keeping shared governance intact.
     """
 
     resolved_settings = settings or get_settings()

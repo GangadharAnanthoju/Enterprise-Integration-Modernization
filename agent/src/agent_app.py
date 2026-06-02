@@ -10,18 +10,9 @@ from agent_contracts import AgentChatResult, PlannedAction
 from agent_execution import execute_planned_action
 
 
-# **************** TEMPORARY AGENT SCAFFOLD ****************
-# These lightweight classes and helper functions support the learning project
-# before the real Microsoft Agent Framework / Foundry agent is wired in.
-# Later, the production agent can replace intent detection, entity extraction,
-# and planning logic while preserving the same API contracts.
-# ***********************************************************
-
-
 INTENT_TOOL_RULES: tuple[tuple[tuple[str, ...], str], ...] = (
-    # These rules are intentionally simple and transparent for the learning
-    # project. A Foundry-hosted agent can replace this later while returning
-    # the same selected tool and planned action shape.
+    # Local deterministic planner rules. Foundry mode uses the same selected
+    # tool and planned action shape after model-based planning.
     (("order",), "getOrderStatus"),
     (("invoice", "validate"), "validateInvoice"),
     (("shipment", "status"), "checkShipmentStatus"),
@@ -32,10 +23,6 @@ INTENT_TOOL_RULES: tuple[tuple[tuple[str, ...], str], ...] = (
     (("correlation", "status"), "queryIntegrationRunStatus"),
 )
 
-# **************** TEMPORARY UNTIL REAL AGENT PLANNER ****************
-# A Foundry-hosted agent should eventually replace this rule-based detector.
-# Keep the output contract: selected approved MCP tool name or None.
-# ********************************************************************
 def detect_tool_from_message(user_message: str) -> str | None:
     """Map a simple user message to an approved tool name using transparent rules."""
 
@@ -47,10 +34,6 @@ def detect_tool_from_message(user_message: str) -> str | None:
     return None
 
 
-# **************** TEMPORARY UNTIL REAL ENTITY EXTRACTION ****************
-# A production agent can use structured extraction or model output here.
-# Keep the output contract: dict of business entity names to values.
-# ***********************************************************************
 def extract_entities(user_message: str) -> dict[str, str]:
     """Extract simple business identifiers from a user message."""
 
@@ -71,11 +54,6 @@ def extract_entities(user_message: str) -> dict[str, str]:
     return entities
 
 
-# **************** TEMPORARY AGENT ENTRYPOINT ****************
-# This function is the current stand-in for the future Agent Framework /
-# Foundry orchestration layer. Later, the real agent should still produce the
-# same planned action, simulation result, or approval request response shapes.
-# ************************************************************
 def handle_chat_message(
     user_message: str,
     correlation_id: str,
@@ -113,7 +91,7 @@ def handle_chat_message(
         simulate_when_ready=simulate_when_ready,
         plan_only_message=(
             f"Agent shell selected approved tool '{selected_tool}'. Execution is not automatic yet; "
-            "set simulate_when_ready=true to test mock execution from chat."
+            "set simulate_when_ready=true to execute the approved MCP path from chat."
         ),
         missing_entities_message=None,
         unsupported_tool_message=(

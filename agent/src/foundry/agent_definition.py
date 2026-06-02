@@ -74,7 +74,7 @@ def validate_foundry_agent_definition(
     configured_tools = set(resolved_definition.approved_tool_names)
     missing_tools = sorted(expected_tools - configured_tools)
     if missing_tools:
-        missing.append(f"approved tool placeholders missing: {', '.join(missing_tools)}")
+        missing.append(f"approved tool entries missing: {', '.join(missing_tools)}")
 
     required_phrases = [
         "target: microsoft_foundry",
