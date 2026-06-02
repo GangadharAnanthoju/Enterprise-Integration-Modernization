@@ -17,13 +17,16 @@
             ],
             "properties": {
               "server_name": {
-                "type": "string"
+                "type": "string",
+                "description": "MCP server name expected by the workflow. Use logic-apps-standard-mcp."
               },
               "tool_name": {
-                "type": "string"
+                "type": "string",
+                "description": "Approved MCP tool name. Must be getOrderStatus for this workflow."
               },
               "correlation_id": {
-                "type": "string"
+                "type": "string",
+                "description": "Correlation ID used for audit, tracing, troubleshooting, and response correlation."
               },
               "payload": {
                 "type": "object",
@@ -32,18 +35,23 @@
                 ],
                 "properties": {
                   "order_id": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Business order identifier to check, for example ORD-1001."
                   }
                 },
-                "additionalProperties": true
+                "additionalProperties": true,
+                "description": "Tool-specific payload for the getOrderStatus workflow. Provide the business order identifier to look up current order status."
               },
               "timeout_seconds": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Optional requested timeout in seconds for the MCP tool execution."
               }
             },
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "MCP request envelope for the getOrderStatus tool."
           }
-        }
+        },
+        "description": "Use this tool to retrieve read-only order status, estimated delivery date, and delay risk for a business order. Requires payload.order_id such as ORD-1001. Does not create or update records."
       }
     },
     "actions": {
@@ -130,7 +138,8 @@
         "runAfter": {}
       }
     },
-    "outputs": {}
+    "outputs": {},
+    "description": "Use this tool to retrieve read-only order status, estimated delivery date, and delay risk for a business order. Requires payload.order_id such as ORD-1001. Does not create or update records."
   },
   "kind": "Stateful"
 }

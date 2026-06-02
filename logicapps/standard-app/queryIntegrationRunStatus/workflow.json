@@ -17,13 +17,16 @@
             ],
             "properties": {
               "server_name": {
-                "type": "string"
+                "type": "string",
+                "description": "MCP server name expected by the workflow. Use logic-apps-standard-mcp."
               },
               "tool_name": {
-                "type": "string"
+                "type": "string",
+                "description": "Approved MCP tool name. Must be queryIntegrationRunStatus for this workflow."
               },
               "correlation_id": {
-                "type": "string"
+                "type": "string",
+                "description": "Correlation ID used for audit, tracing, troubleshooting, and response correlation."
               },
               "payload": {
                 "type": "object",
@@ -32,18 +35,23 @@
                 ],
                 "properties": {
                   "correlation_id": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Correlation ID for the integration run to investigate."
                   }
                 },
-                "additionalProperties": true
+                "additionalProperties": true,
+                "description": "Tool-specific payload for the queryIntegrationRunStatus workflow. Provide the correlation ID from an integration run or support case."
               },
               "timeout_seconds": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Optional requested timeout in seconds for the MCP tool execution."
               }
             },
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "MCP request envelope for the queryIntegrationRunStatus tool."
           }
-        }
+        },
+        "description": "Use this tool to retrieve read-only integration run status and troubleshooting details for a known correlation ID. Requires payload.correlation_id."
       }
     },
     "actions": {
@@ -129,7 +137,8 @@
         "runAfter": {}
       }
     },
-    "outputs": {}
+    "outputs": {},
+    "description": "Use this tool to retrieve read-only integration run status and troubleshooting details for a known correlation ID. Requires payload.correlation_id."
   },
   "kind": "Stateful"
 }

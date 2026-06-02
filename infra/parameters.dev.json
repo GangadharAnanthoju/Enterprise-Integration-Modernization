@@ -6,16 +6,26 @@
       "value": "dev"
     },
     "location": {
-      "value": "eastus"
+      "value": "swedencentral"
     },
     "projectPrefix": {
-      "value": "aiint"
+      "value": "sysint"
+    },
+    "logicAppName": {
+      "value": "la-sysint-enterprise-integration-eus"
+    },
+    "appServicePlanName": {
+      "value": "asp-sysint-enterprise-integration-eus"
+    },
+    "storageAccountName": {
+      "value": "stsysintintegeus001"
     },
     "tags": {
       "value": {
-        "Project": "AI-Ready Integration Modernization",
+        "Project": "Enterprise Integration Modernization",
         "Owner": "Integration Team",
-        "Environment": "dev"
+        "Environment": "dev",
+        "CostPosture": "Disposable learning deployment"
       }
     }
   }

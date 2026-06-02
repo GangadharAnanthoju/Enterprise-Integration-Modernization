@@ -17,13 +17,16 @@
             ],
             "properties": {
               "server_name": {
-                "type": "string"
+                "type": "string",
+                "description": "MCP server name expected by the workflow. Use logic-apps-standard-mcp."
               },
               "tool_name": {
-                "type": "string"
+                "type": "string",
+                "description": "Approved MCP tool name. Must be sendSupplierNotification for this workflow."
               },
               "correlation_id": {
-                "type": "string"
+                "type": "string",
+                "description": "Correlation ID used for audit, tracing, troubleshooting, and response correlation."
               },
               "payload": {
                 "type": "object",
@@ -32,18 +35,23 @@
                 ],
                 "properties": {
                   "shipment_id": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Business shipment identifier for the supplier notification, for example SHIP-3001."
                   }
                 },
-                "additionalProperties": true
+                "additionalProperties": true,
+                "description": "Tool-specific payload for supplier notification. Use only after governance approval because this can create external communication."
               },
               "timeout_seconds": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Optional requested timeout in seconds for the MCP tool execution."
               }
             },
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "MCP request envelope for the sendSupplierNotification tool."
           }
-        }
+        },
+        "description": "Use this high-risk tool to send or record a supplier notification for a shipment after approval. Requires payload.shipment_id such as SHIP-3001."
       }
     },
     "actions": {
@@ -128,7 +136,8 @@
         "runAfter": {}
       }
     },
-    "outputs": {}
+    "outputs": {},
+    "description": "Use this high-risk tool to send or record a supplier notification for a shipment after approval. Requires payload.shipment_id such as SHIP-3001."
   },
   "kind": "Stateful"
 }

@@ -2,6 +2,12 @@
 
 This project starts in local mock mode, then deploys Azure infrastructure, Logic Apps MCP workflows, Functions, and the agent API. Foundry setup is treated as a required platform baseline, not an optional add-on.
 
+For the exact Logic Apps Standard deployment commands used in this project, see:
+
+```text
+docs/logic-apps-azure-deployment-guide.md
+```
+
 ## Deployment Order
 
 1. Verify package and SDK versions for Microsoft Agent Framework and Foundry.

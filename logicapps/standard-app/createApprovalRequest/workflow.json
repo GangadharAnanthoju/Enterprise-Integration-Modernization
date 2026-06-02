@@ -17,39 +17,50 @@
             ],
             "properties": {
               "server_name": {
-                "type": "string"
+                "type": "string",
+                "description": "MCP server name expected by the workflow. Use logic-apps-standard-mcp."
               },
               "tool_name": {
-                "type": "string"
+                "type": "string",
+                "description": "Approved MCP tool name. Must be createApprovalRequest for this workflow."
               },
               "correlation_id": {
-                "type": "string"
+                "type": "string",
+                "description": "Correlation ID used for audit, tracing, troubleshooting, and response correlation."
               },
               "payload": {
                 "type": "object",
                 "properties": {
                   "toolName": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Name of the governed tool that requires approval, for example sendSupplierNotification."
                   },
                   "riskLevel": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Risk level for the requested action, typically High for approval-gated tools."
                   },
                   "requestedBy": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "User or agent identity requesting approval."
                   },
                   "businessJustification": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Business reason explaining why the approval-gated action should run."
                   }
                 },
-                "additionalProperties": true
+                "additionalProperties": true,
+                "description": "Tool-specific payload describing the action that needs approval and the business justification."
               },
               "timeout_seconds": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Optional requested timeout in seconds for the MCP tool execution."
               }
             },
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "MCP request envelope for the createApprovalRequest tool."
           }
-        }
+        },
+        "description": "Use this tool to create a human approval request for governed workflow execution. Use when a high-risk tool needs approval before backend execution."
       }
     },
     "actions": {
@@ -117,7 +128,8 @@
         "runAfter": {}
       }
     },
-    "outputs": {}
+    "outputs": {},
+    "description": "Use this tool to create a human approval request for governed workflow execution. Use when a high-risk tool needs approval before backend execution."
   },
   "kind": "Stateful"
 }

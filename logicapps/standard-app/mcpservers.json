@@ -1,0 +1,31 @@
+{
+  "mcpServers": [
+    {
+      "name": "enterpriseintegrationmcp",
+      "description": "Enterprise integration MCP server exposing governed Logic Apps workflows for order, shipment, invoice, integration run, approval, supplier notification, and ServiceNow ticket operations.",
+      "tools": [
+        {
+          "name": "getOrderStatus"
+        },
+        {
+          "name": "checkShipmentStatus"
+        },
+        {
+          "name": "validateInvoice"
+        },
+        {
+          "name": "queryIntegrationRunStatus"
+        },
+        {
+          "name": "createApprovalRequest"
+        },
+        {
+          "name": "sendSupplierNotification"
+        },
+        {
+          "name": "createServiceNowTicket"
+        }
+      ]
+    }
+  ]
+}

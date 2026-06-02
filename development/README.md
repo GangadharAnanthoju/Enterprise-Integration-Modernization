@@ -107,5 +107,11 @@ The goal is to make the AI project understandable from an Azure Integration Serv
 | 15A | Plan Foundry evaluation dataset strategy | `step15/step-15a-foundry-evaluation-plan.md` |
 | 15B | Export local evaluation cases as Foundry-ready JSONL | `step15/step-15b-foundry-evaluation-jsonl-export.md` |
 | 15C | Finish Step 15 evaluation foundation | `step15/step-15c-step-15-completion.md` |
+| 16A | Plan disposable Azure Logic Apps Standard deployment | `step16/step-16a-azure-logic-apps-deployment-plan.md` |
+| 16B | Validate Azure Logic Apps Bicep and capture quota blocker | `step16/step-16b-azure-bicep-validation.md` |
+| 16C | Deploy disposable Azure Logic Apps Standard infrastructure | `step16/step-16c-azure-logic-apps-infra-deployment.md` |
+| 16D | Publish workflows to Azure Logic Apps Standard | `step16/step-16d-publish-azure-workflows.md` |
+| 16E | Add MCP tool discovery descriptions to Logic Apps workflows | `step16/step-16e-mcp-tool-description-metadata.md` |
+| 16F | Upgrade Logic App Node.js runtime setting from 18 to 24 | `step16/step-16f-node-runtime-upgrade.md` |
 | Azure setup | Environment variable guide for local and Azure settings | `azure-environment-setup.md` |
 | Local setup | Create a root Python virtual environment | `local-python-environment.md` |

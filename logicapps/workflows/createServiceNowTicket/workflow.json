@@ -17,33 +17,42 @@
             ],
             "properties": {
               "server_name": {
-                "type": "string"
+                "type": "string",
+                "description": "MCP server name expected by the workflow. Use logic-apps-standard-mcp."
               },
               "tool_name": {
-                "type": "string"
+                "type": "string",
+                "description": "Approved MCP tool name. Must be createServiceNowTicket for this workflow."
               },
               "correlation_id": {
-                "type": "string"
+                "type": "string",
+                "description": "Correlation ID used for audit, tracing, troubleshooting, and response correlation."
               },
               "payload": {
                 "type": "object",
                 "properties": {
                   "shortDescription": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Short description for the ServiceNow ticket. If omitted, a default integration support description is used."
                   },
                   "assignmentGroup": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "ServiceNow assignment group that should own the ticket. If omitted, Integration Support is used."
                   }
                 },
-                "additionalProperties": true
+                "additionalProperties": true,
+                "description": "Tool-specific payload for ServiceNow ticket creation. Use after governance approval for high-risk operational actions."
               },
               "timeout_seconds": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Optional requested timeout in seconds for the MCP tool execution."
               }
             },
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "MCP request envelope for the createServiceNowTicket tool."
           }
-        }
+        },
+        "description": "Use this high-risk tool to create a ServiceNow incident or support ticket for an integration issue after approval. Optional payload fields can describe the issue and assignment group."
       }
     },
     "actions": {
@@ -109,7 +118,8 @@
         "runAfter": {}
       }
     },
-    "outputs": {}
+    "outputs": {},
+    "description": "Use this high-risk tool to create a ServiceNow incident or support ticket for an integration issue after approval. Optional payload fields can describe the issue and assignment group."
   },
   "kind": "Stateful"
 }

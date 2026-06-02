@@ -3,5 +3,15 @@
   "extensionBundle": {
     "id": "Microsoft.Azure.Functions.ExtensionBundle.Workflows",
     "version": "[1.*, 2.0.0)"
+  },
+  "extensions": {
+    "workflow": {
+      "McpServerEndpoints": {
+        "enable": true,
+        "authentication": {
+          "type": "ApiKey"
+        }
+      }
+    }
   }
 }

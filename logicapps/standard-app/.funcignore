@@ -1,1 +1,9 @@
 workflow-designtime/
+local.settings.json
+__azurite_db_*__.json
+__blobstorage__/
+__queuestorage__/
+AzuriteConfig
+.vscode/
+*.code-workspace
+README.md

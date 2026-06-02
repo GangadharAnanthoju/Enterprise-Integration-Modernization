@@ -4,5 +4,25 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"mcp": {
+			"servers": {
+				"enterpriseintegrationmcp": {
+					"url": "https://la-sysint-enterprise-integration-eus.azurewebsites.net/api/mcpservers/enterpriseintegrationmcp/mcp",
+					"type": "http",
+					"headers": {
+						"X-API-Key": "${input:logicAppsMcpApiKey}"
+					}
+				}
+			},
+			"inputs": [
+				{
+					"id": "logicAppsMcpApiKey",
+					"type": "promptString",
+					"description": "Logic Apps MCP API key",
+					"password": true
+				}
+			]
+		}
+	}
 }

@@ -137,6 +137,29 @@ def test_all_logic_app_workflows_have_http_trigger_and_response_action() -> None
         assert _contains_response_action(actions)
 
 
+def test_all_logic_app_workflows_have_mcp_discovery_descriptions() -> None:
+    for tool in list_tools():
+        workflow_path = REPO_ROOT / f"logicapps/workflows/{tool.name}/workflow.json"
+        workflow = json.loads(workflow_path.read_text(encoding="utf-8"))
+        definition = workflow["definition"]
+        trigger = definition["triggers"]["When_an_HTTP_request_is_received"]
+        schema = trigger["inputs"]["schema"]
+        properties = schema["properties"]
+        payload = properties["payload"]
+
+        assert definition["description"]
+        assert trigger["description"]
+        assert schema["description"]
+        assert properties["server_name"]["description"]
+        assert properties["tool_name"]["description"]
+        assert properties["correlation_id"]["description"]
+        assert properties["payload"]["description"]
+        assert properties["timeout_seconds"]["description"]
+
+        for property_name, property_schema in payload.get("properties", {}).items():
+            assert property_schema["description"], property_name
+
+
 def test_logic_apps_standard_workspace_and_sample_request_are_valid() -> None:
     workspace_path = (
         REPO_ROOT

@@ -17,13 +17,16 @@
             ],
             "properties": {
               "server_name": {
-                "type": "string"
+                "type": "string",
+                "description": "MCP server name expected by the workflow. Use logic-apps-standard-mcp."
               },
               "tool_name": {
-                "type": "string"
+                "type": "string",
+                "description": "Approved MCP tool name. Must be validateInvoice for this workflow."
               },
               "correlation_id": {
-                "type": "string"
+                "type": "string",
+                "description": "Correlation ID used for audit, tracing, troubleshooting, and response correlation."
               },
               "payload": {
                 "type": "object",
@@ -32,18 +35,23 @@
                 ],
                 "properties": {
                   "invoice_id": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Business invoice identifier to validate, for example INV-2001."
                   }
                 },
-                "additionalProperties": true
+                "additionalProperties": true,
+                "description": "Tool-specific payload for invoice validation. Provide the invoice identifier to check validation status."
               },
               "timeout_seconds": {
-                "type": "integer"
+                "type": "integer",
+                "description": "Optional requested timeout in seconds for the MCP tool execution."
               }
             },
-            "additionalProperties": true
+            "additionalProperties": true,
+            "description": "MCP request envelope for the validateInvoice tool."
           }
-        }
+        },
+        "description": "Use this tool to validate invoice readiness and exception status before payment processing. Requires payload.invoice_id such as INV-2001."
       }
     },
     "actions": {
@@ -130,7 +138,8 @@
         "runAfter": {}
       }
     },
-    "outputs": {}
+    "outputs": {},
+    "description": "Use this tool to validate invoice readiness and exception status before payment processing. Requires payload.invoice_id such as INV-2001."
   },
   "kind": "Stateful"
 }

@@ -1,3 +1,5 @@
+import json
+
 import pytest
 import httpx
 
@@ -130,17 +132,48 @@ def test_remote_mcp_executor_requires_endpoint_configuration() -> None:
 
 
 def test_remote_mcp_http_client_posts_envelope_with_safe_auth_headers() -> None:
-    captured_request: httpx.Request | None = None
+    captured_requests: list[httpx.Request] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
-        nonlocal captured_request
-        captured_request = request
+        captured_requests.append(request)
+        body = json.loads(request.read())
+        if body["method"] == "initialize":
+            return httpx.Response(
+                200,
+                headers={"Mcp-Session-Id": "session-123"},
+                json={
+                    "jsonrpc": "2.0",
+                    "id": body["id"],
+                    "result": {
+                        "protocolVersion": "2025-06-18",
+                        "capabilities": {"tools": {}},
+                        "serverInfo": {"name": "logic-apps-prod-mcp"},
+                    },
+                },
+            )
+        if body["method"] == "notifications/initialized":
+            return httpx.Response(202)
+
         return httpx.Response(
             200,
             json={
-                "status": "completed",
-                "result": {"orderNumber": "4500098123"},
-                "message": "Remote MCP execution completed.",
+                "jsonrpc": "2.0",
+                "id": body["id"],
+                "result": {
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": json.dumps(
+                                {
+                                    "status": "completed",
+                                    "result": {"orderNumber": "4500098123"},
+                                    "message": "Remote MCP execution completed.",
+                                }
+                            ),
+                        }
+                    ],
+                    "isError": False,
+                },
             },
         )
 
@@ -165,15 +198,25 @@ def test_remote_mcp_http_client_posts_envelope_with_safe_auth_headers() -> None:
 
     assert response["status"] == "completed"
     assert response["result"] == {"orderNumber": "4500098123"}
-    assert captured_request is not None
-    assert captured_request.url == "https://example.contoso/mcp"
-    assert captured_request.headers["Authorization"] == "Bearer secret-token"
-    assert captured_request.headers["X-Correlation-ID"] == "remote-corr-003"
-    assert captured_request.headers["X-MCP-Tool-Name"] == "getOrderStatus"
-    assert captured_request.read() == (
-        b'{"server_name":"logic-apps-prod-mcp","tool_name":"getOrderStatus",'
-        b'"correlation_id":"remote-corr-003","payload":{"order_id":"ORD-1001"}}'
-    )
+    assert len(captured_requests) == 3
+    tool_call_request = captured_requests[2]
+    assert tool_call_request.url == "https://example.contoso/mcp"
+    assert tool_call_request.headers["X-API-Key"] == "secret-token"
+    assert tool_call_request.headers["X-Correlation-ID"] == "remote-corr-003"
+    assert tool_call_request.headers["MCP-Protocol-Version"] == "2025-06-18"
+    assert tool_call_request.headers["Mcp-Session-Id"] == "session-123"
+
+    body = json.loads(tool_call_request.read())
+    assert body["method"] == "tools/call"
+    assert body["params"] == {
+        "name": "getOrderStatus",
+        "arguments": {
+            "server_name": "logic-apps-prod-mcp",
+            "tool_name": "getOrderStatus",
+            "correlation_id": "remote-corr-003",
+            "payload": {"order_id": "ORD-1001"},
+        },
+    }
 
 
 def test_remote_mcp_executor_returns_normalized_remote_output() -> None:
@@ -187,14 +230,14 @@ def test_remote_mcp_executor_returns_normalized_remote_output() -> None:
     http_client = RemoteMcpHttpClient(
         config,
         transport=httpx.MockTransport(
-            lambda request: httpx.Response(
-                200,
-                json={
+            lambda request: _mock_mcp_response(
+                request,
+                result={
                     "status": "completed",
                     "result": {"orderNumber": "4500098123"},
                     "message": "Remote execution completed.",
                 },
-            )
+            ),
         ),
     )
     executor = RemoteMcpExecutor(
@@ -215,6 +258,39 @@ def test_remote_mcp_executor_returns_normalized_remote_output() -> None:
     assert output.status == "completed"
     assert output.result == {"orderNumber": "4500098123"}
     assert output.message == "Remote execution completed."
+
+
+def _mock_mcp_response(request: httpx.Request, *, result: dict[str, object]) -> httpx.Response:
+    """Return a small MCP JSON-RPC response for remote executor tests."""
+
+    body = json.loads(request.read())
+    if body["method"] == "initialize":
+        return httpx.Response(
+            200,
+            json={
+                "jsonrpc": "2.0",
+                "id": body["id"],
+                "result": {
+                    "protocolVersion": "2025-06-18",
+                    "capabilities": {"tools": {}},
+                    "serverInfo": {"name": "logic-apps-prod-mcp"},
+                },
+            },
+        )
+    if body["method"] == "notifications/initialized":
+        return httpx.Response(202)
+
+    return httpx.Response(
+        200,
+        json={
+            "jsonrpc": "2.0",
+            "id": body["id"],
+            "result": {
+                "content": [{"type": "text", "text": json.dumps(result)}],
+                "isError": False,
+            },
+        },
+    )
 
 
 def test_remote_mcp_http_client_maps_auth_and_timeout_failures() -> None:
