@@ -14,7 +14,7 @@ This module contains:
 
 | Function or class | Purpose |
 |---|---|
-| `create_foundry_project_client` | Creates an `AIProjectClient` using Azure CLI credentials |
+| `create_foundry_project_client` | Creates an `AIProjectClient` using `DefaultAzureCredential` |
 | `build_prompt_agent_definition` | Converts the local Foundry instruction file into a Foundry Prompt Agent definition |
 | `create_or_update_foundry_prompt_agent_version` | Runs preflight and creates a new Foundry agent version |
 | `FoundryAgentVersionResult` | Returns a safe summary of the live operation |
@@ -33,7 +33,7 @@ FOUNDRY_AGENT_NAME
 It authenticates with:
 
 ```text
-AzureCliCredential
+DefaultAzureCredential
 ```
 
 That means the developer must already be signed in with Azure CLI and have permission on the Foundry project.

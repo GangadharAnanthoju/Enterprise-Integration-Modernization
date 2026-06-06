@@ -1,0 +1,16 @@
+{
+  "server_name": "logic-apps-standard-mcp",
+  "tool_name": "SendEmailNotification",
+  "correlation_id": "local-corr-email-001",
+  "payload": {
+    "to": "ops-team@contoso.com",
+    "subject": "Integration notification",
+    "body": "Order ORD-1001 is now in transit.",
+    "cc": "integration-leads@contoso.com",
+    "body_type": "Text",
+    "from_name": "Enterprise Integration Agent",
+    "priority": "Normal",
+    "category": "alert"
+  },
+  "timeout_seconds": 30
+}

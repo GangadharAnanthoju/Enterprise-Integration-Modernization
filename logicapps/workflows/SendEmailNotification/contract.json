@@ -1,0 +1,63 @@
+{
+  "tool_name": "SendEmailNotification",
+  "workflow_name": "SendEmailNotification",
+  "description": "Sends an email via the enterprise email service. Use this tool whenever an email notification needs to be delivered to a user, team, or system.",
+  "risk_level": "medium",
+  "approval_required": false,
+  "method": "POST",
+  "required_entities": [
+    "to",
+    "subject",
+    "body"
+  ],
+  "request_schema": {
+    "type": "object",
+    "required": [
+      "to",
+      "subject",
+      "body"
+    ],
+    "properties": {
+      "to": {
+        "type": "string",
+        "description": "Recipient email address."
+      },
+      "subject": {
+        "type": "string",
+        "description": "Email subject line."
+      },
+      "body": {
+        "type": "string",
+        "description": "Email body as plain text or HTML."
+      },
+      "cc": {
+        "type": "string",
+        "description": "Optional CC recipient email address."
+      },
+      "body_type": {
+        "type": "string",
+        "enum": [
+          "HTML",
+          "Text"
+        ],
+        "default": "Text"
+      },
+      "from_name": {
+        "type": "string"
+      },
+      "priority": {
+        "type": "string",
+        "enum": [
+          "High",
+          "Normal",
+          "Low"
+        ],
+        "default": "Normal"
+      },
+      "category": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  }
+}

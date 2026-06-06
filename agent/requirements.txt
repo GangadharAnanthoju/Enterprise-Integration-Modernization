@@ -8,6 +8,7 @@ agent-framework-foundry
 azure-ai-projects
 aiohttp
 azure-identity
+azure-data-tables
 azure-keyvault-secrets
 azure-monitor-opentelemetry
 opentelemetry-api

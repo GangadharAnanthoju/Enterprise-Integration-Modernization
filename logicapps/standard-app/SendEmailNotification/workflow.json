@@ -1,0 +1,223 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "triggers": {
+      "When_an_HTTP_request_is_received": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "required": [
+              "server_name",
+              "tool_name",
+              "correlation_id",
+              "payload"
+            ],
+            "properties": {
+              "server_name": {
+                "type": "string",
+                "description": "MCP server name expected by the workflow. Use logic-apps-standard-mcp."
+              },
+              "tool_name": {
+                "type": "string",
+                "description": "Approved MCP tool name. Must be SendEmailNotification for this workflow."
+              },
+              "correlation_id": {
+                "type": "string",
+                "description": "Correlation ID used for audit, tracing, troubleshooting, and response correlation."
+              },
+              "payload": {
+                "type": "object",
+                "required": [
+                  "to",
+                  "subject",
+                  "body"
+                ],
+                "properties": {
+                  "to": {
+                    "type": "string",
+                    "description": "Required recipient email address."
+                  },
+                  "subject": {
+                    "type": "string",
+                    "description": "Required email subject line."
+                  },
+                  "body": {
+                    "type": "string",
+                    "description": "Required email body as plain text or HTML."
+                  },
+                  "cc": {
+                    "type": "string",
+                    "description": "Optional CC recipient email address."
+                  },
+                  "body_type": {
+                    "type": "string",
+                    "enum": [
+                      "HTML",
+                      "Text"
+                    ],
+                    "default": "Text",
+                    "description": "Optional body format. Use HTML or Text. Defaults to Text."
+                  },
+                  "from_name": {
+                    "type": "string",
+                    "description": "Optional display name for the sender."
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": [
+                      "High",
+                      "Normal",
+                      "Low"
+                    ],
+                    "default": "Normal",
+                    "description": "Optional delivery priority. Use High, Normal, or Low. Defaults to Normal."
+                  },
+                  "category": {
+                    "type": "string",
+                    "description": "Optional routing or filtering category, for example loan, invoice, or alert."
+                  }
+                },
+                "additionalProperties": false,
+                "description": "Tool-specific payload for sending an enterprise email notification. Requires to, subject, and body; supports optional CC, body type, sender display name, priority, and category."
+              },
+              "timeout_seconds": {
+                "type": "integer",
+                "description": "Optional requested timeout in seconds for the MCP tool execution."
+              }
+            },
+            "additionalProperties": true,
+            "description": "MCP request envelope for the SendEmailNotification tool."
+          }
+        },
+        "description": "Sends an email via the enterprise email service. Use this tool whenever an email notification needs to be delivered to a user, team, or system. Supports plain text and HTML body, optional CC, priority, category, and sender display name."
+      }
+    },
+    "actions": {
+      "Validate_mcp_envelope": {
+        "type": "If",
+        "expression": {
+          "and": [
+            {
+              "equals": [
+                "@triggerBody()?['tool_name']",
+                "SendEmailNotification"
+              ]
+            },
+            {
+              "not": {
+                "equals": [
+                  "@triggerBody()?['payload']?['to']",
+                  null
+                ]
+              }
+            },
+            {
+              "not": {
+                "equals": [
+                  "@triggerBody()?['payload']?['to']",
+                  ""
+                ]
+              }
+            },
+            {
+              "not": {
+                "equals": [
+                  "@triggerBody()?['payload']?['subject']",
+                  null
+                ]
+              }
+            },
+            {
+              "not": {
+                "equals": [
+                  "@triggerBody()?['payload']?['subject']",
+                  ""
+                ]
+              }
+            },
+            {
+              "not": {
+                "equals": [
+                  "@triggerBody()?['payload']?['body']",
+                  null
+                ]
+              }
+            },
+            {
+              "not": {
+                "equals": [
+                  "@triggerBody()?['payload']?['body']",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        "actions": {
+          "Compose_email_notification_result": {
+            "type": "Compose",
+            "inputs": {
+              "messageId": "EMAIL-1001",
+              "recipient": "@triggerBody()?['payload']?['to']",
+              "cc": "@triggerBody()?['payload']?['cc']",
+              "subject": "@triggerBody()?['payload']?['subject']",
+              "bodyType": "@coalesce(triggerBody()?['payload']?['body_type'], 'Text')",
+              "fromName": "@triggerBody()?['payload']?['from_name']",
+              "priority": "@coalesce(triggerBody()?['payload']?['priority'], 'Normal')",
+              "category": "@triggerBody()?['payload']?['category']",
+              "status": "Sent",
+              "confirmation": "@concat('Email notification sent successfully to ', triggerBody()?['payload']?['to'], '.')",
+              "correlationId": "@coalesce(triggerBody()?['correlation_id'], triggerOutputs()?['headers']?['x-correlation-id'], workflow()?['run']?['name'])"
+            }
+          },
+          "Return_mcp_email_notification": {
+            "type": "Response",
+            "kind": "Http",
+            "inputs": {
+              "statusCode": 200,
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "body": {
+                "status": "completed",
+                "result": "@outputs('Compose_email_notification_result')",
+                "message": "@concat('Email notification sent successfully to ', triggerBody()?['payload']?['to'], '.')"
+              }
+            },
+            "runAfter": {
+              "Compose_email_notification_result": [
+                "Succeeded"
+              ]
+            }
+          }
+        },
+        "else": {
+          "actions": {
+            "Return_invalid_mcp_request": {
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 400,
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "body": {
+                  "status": "failed",
+                  "error": "invalid_mcp_request",
+                  "message": "The SendEmailNotification workflow requires tool_name=SendEmailNotification and payload.to, payload.subject, and payload.body."
+                }
+              }
+            }
+          }
+        },
+        "runAfter": {}
+      }
+    },
+    "outputs": {},
+    "description": "Sends an email via the enterprise email service. Use this MCP tool whenever an email notification needs to be delivered to a user, team, or system. Supports plain text and HTML body, optional CC, priority, category, and sender display name."
+  },
+  "kind": "Stateful"
+}

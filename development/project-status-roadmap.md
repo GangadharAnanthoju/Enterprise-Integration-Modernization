@@ -1,10 +1,10 @@
 # Enterprise Integration Modernization - Project Status Roadmap
 
-Last updated: 2026-06-01
+Last updated: 2026-06-06
 
 ## Current Position
 
-We have completed through **Step 15** and started **Step 16**.
+We have completed through **Step 18I**. Step 18 production hardening is complete.
 
 The project now has:
 
@@ -26,6 +26,14 @@ The project now has:
 - enabled the managed Logic Apps MCP server from source-controlled package files
 - started connecting the Python agent runtime to the managed Logic Apps MCP endpoint
 - verified live FastAPI `/agent/chat` execution through the managed Logic Apps MCP server
+- moved audit recording behind a repository abstraction for production hardening
+- moved approval requests and decisions behind a repository abstraction for production hardening
+- persisted audit events and approval records in Azure Table Storage
+- moved the managed Logic Apps MCP API key into Azure Key Vault
+- deployed the FastAPI Container App with managed identity and verified Foundry-to-MCP execution
+- exported governed agent audit events to the shared Application Insights workspace
+- placed a curated FastAPI surface behind shared APIM subscription protection
+- added guarded cost-control, cleanup, and runtime recreation runbooks
 
 ## Current Architecture
 
@@ -83,6 +91,7 @@ In Foundry mode, ready low-risk plans can now execute through the same governed 
 | Logic Apps MCP server | Done | `enterpriseintegrationmcp` exposes seven workflows as managed MCP tools |
 | Agent to managed MCP | Done | Python remote client uses MCP initialize and tools/call |
 | Live Azure MCP chat test | Done | `/agent/chat` executed `getOrderStatus` through `enterpriseintegrationmcp` |
+| Production hardening plan | In progress | Steps 18B-18H add durable persistence, Key Vault, managed identity hosting, Azure observability, and APIM gateway protection |
 
 ## Step Summary
 
@@ -104,11 +113,12 @@ In Foundry mode, ready low-risk plans can now execute through the same governed 
 | 15 | Foundry evaluation dataset strategy and JSONL export | Complete |
 | 16 | Azure Logic Apps Standard deployment, workflow publishing, MCP metadata, and MCP server enablement | Complete |
 | 17 | Agent integration with managed Logic Apps MCP server | Complete |
+| 18 | Production hardening | In progress |
 
 ## Most Recent Commit
 
 ```text
-5e9ad38 Complete Foundry evaluation step 15
+cd04533 Clean up prototype comments after MCP integration
 ```
 
 This commit was pushed to:
@@ -240,29 +250,43 @@ Still pending:
 
 ### Step 18 - Production Hardening
 
-Future enterprise hardening:
+Step 18 documentation:
 
-- persistent audit storage
-- persistent approval storage
-- managed identity
-- Key Vault
-- App Insights / Log Analytics
-- APIM policies
-- RBAC
-- deployment pipeline
+```text
+development/step18/step-18a-production-hardening-plan.md
+development/step18/step-18b-audit-repository-abstraction.md
+development/step18/step-18c-approval-repository-abstraction.md
+development/step18/step-18d-azure-table-persistence.md
+development/step18/step-18e-key-vault-secret-loading.md
+development/step18/step-18f-managed-identity-container-app.md
+development/step18/step-18g-azure-observability.md
+development/step18/step-18h-apim-access-control.md
+development/step18/step-18i-cost-control-runbook.md
+```
+
+Hardening sequence:
+
+- persistent audit storage - Azure Table persistence complete
+- persistent approval storage - Azure Table persistence complete
+- Key Vault - MCP API key loading complete
+- managed identity - Container App deployed and verified against Foundry, Key Vault, and Azure Tables
+- App Insights / Log Analytics - governed audit export deployed and verified
+- APIM policies - curated API, product, subscription protection, and throttling deployed
+- RBAC - managed identities and least-privilege role assignments deployed
+- cost control - guarded plan-only cleanup and recreation scripts complete
 
 ## Recommended Next Step
 
 Start:
 
 ```text
-Step 18A - Production Hardening Plan
+Step 19 - CI/CD And Release Automation
 ```
 
 First implementation target:
 
 ```text
-Plan persistent audit, approvals, Key Vault, managed identity, and observability
+Automate tests, image publishing, infrastructure validation, and controlled environment deployment
 ```
 
-The goal is to move from a working learning deployment to enterprise-grade operations.
+The goal is to turn the proven deployment scripts into a repeatable release pipeline.

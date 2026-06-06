@@ -13,6 +13,8 @@ def test_validate_environment_passes_for_default_mock_mode() -> None:
     assert checks["remote_mcp_auth"].status == "skip"
     assert checks["foundry_runtime"].status == "warning"
     assert checks["foundry_resource_context"].status == "warning"
+    assert checks["secret_provider"].status == "pass"
+    assert checks["persistence"].status == "pass"
     assert checks["appinsights"].status == "warning"
 
 
@@ -42,6 +44,8 @@ def test_validate_environment_passes_for_complete_remote_mcp_settings() -> None:
     assert checks["remote_mcp_auth"].status == "pass"
     assert checks["foundry_runtime"].status == "pass"
     assert checks["foundry_resource_context"].status == "pass"
+    assert checks["secret_provider"].status == "pass"
+    assert checks["persistence"].status == "pass"
     assert checks["appinsights"].status == "pass"
 
 
@@ -63,7 +67,10 @@ def test_validate_environment_fails_for_remote_mode_without_endpoint_or_key() ->
         == "Remote MCP mode requires MCP_SERVER_URL or at least one per-tool endpoint."
     )
     assert checks["remote_mcp_auth"].status == "fail"
-    assert checks["remote_mcp_auth"].details == "Remote MCP mode requires MCP_API_KEY."
+    assert (
+        checks["remote_mcp_auth"].details
+        == "Remote MCP mode requires MCP_API_KEY or a configured Key Vault provider."
+    )
 
 
 def test_validate_environment_fails_for_inconsistent_mcp_mode() -> None:
@@ -99,3 +106,55 @@ def test_validate_environment_allows_local_logic_app_tool_endpoint_without_api_k
     assert report.status == "ready"
     assert checks["remote_mcp_endpoint"].status == "pass"
     assert checks["remote_mcp_auth"].status == "warning"
+
+
+def test_validate_environment_fails_for_azure_table_mode_without_account_url() -> None:
+    report = validate_environment(
+        Settings(_env_file=None, persistence_mode="azure_table", storage_account_url=None)
+    )
+
+    checks = {check.name: check for check in report.checks}
+    assert report.status == "needs_attention"
+    assert checks["persistence"].status == "fail"
+    assert checks["persistence"].details == "Azure Table persistence requires STORAGE_ACCOUNT_URL."
+
+
+def test_validate_environment_passes_for_azure_table_mode_with_account_url() -> None:
+    report = validate_environment(
+        Settings(
+            _env_file=None,
+            persistence_mode="azure_table",
+            storage_account_url="https://stsysintintegeus001.table.core.windows.net",
+        )
+    )
+
+    checks = {check.name: check for check in report.checks}
+    assert checks["persistence"].status == "pass"
+
+
+def test_validate_environment_passes_for_key_vault_remote_mcp_auth() -> None:
+    report = validate_environment(
+        Settings(
+            _env_file=None,
+            mock_mcp=False,
+            mcp_execution_mode="remote",
+            mcp_server_url="https://example.contoso/mcp",
+            mcp_api_key=None,
+            secret_provider="key_vault",
+            key_vault_url="https://kv-sysint-common-eus.vault.azure.net/",
+        )
+    )
+
+    checks = {check.name: check for check in report.checks}
+    assert checks["remote_mcp_auth"].status == "pass"
+    assert checks["secret_provider"].status == "pass"
+
+
+def test_validate_environment_fails_for_key_vault_without_url() -> None:
+    report = validate_environment(
+        Settings(_env_file=None, secret_provider="key_vault", key_vault_url=None)
+    )
+
+    checks = {check.name: check for check in report.checks}
+    assert report.status == "needs_attention"
+    assert checks["secret_provider"].status == "fail"

@@ -12,7 +12,7 @@ from typing import Any
 
 from azure.ai.projects import AIProjectClient
 from azure.ai.projects.models import PromptAgentDefinition
-from azure.identity import AzureCliCredential
+from azure.identity import DefaultAzureCredential
 from agent_framework.foundry import FoundryAgent
 
 from config import Settings, get_settings
@@ -50,7 +50,7 @@ class FoundryAgentInvocationResult:
 
 
 def create_foundry_project_client(settings: Settings | None = None) -> AIProjectClient:
-    """Create an Azure AI Foundry project client using Azure CLI credentials."""
+    """Create a Foundry project client using local or managed Azure identity."""
 
     resolved_settings = settings or get_settings()
     if not resolved_settings.foundry_project_endpoint:
@@ -58,7 +58,7 @@ def create_foundry_project_client(settings: Settings | None = None) -> AIProject
 
     return AIProjectClient(
         endpoint=resolved_settings.foundry_project_endpoint,
-        credential=AzureCliCredential(),
+        credential=DefaultAzureCredential(),
         allow_preview=True,
     )
 
@@ -76,7 +76,7 @@ def create_foundry_runtime_agent(settings: Settings | None = None) -> FoundryAge
         project_endpoint=resolved_settings.foundry_project_endpoint,
         agent_name=resolved_settings.foundry_agent_name,
         agent_version=resolved_settings.foundry_agent_version,
-        credential=AzureCliCredential(),
+        credential=DefaultAzureCredential(),
         allow_preview=True,
     )
 

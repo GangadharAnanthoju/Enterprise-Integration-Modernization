@@ -38,6 +38,8 @@ def validate_environment(settings: Settings | None = None) -> EnvironmentValidat
         _check_remote_mcp_auth(resolved_settings),
         _check_foundry_runtime(resolved_settings),
         _check_foundry_resource_context(resolved_settings),
+        _check_secret_provider(resolved_settings),
+        _check_persistence(resolved_settings),
         _check_appinsights(resolved_settings),
     ]
     report_status = (
@@ -134,6 +136,13 @@ def _check_remote_mcp_auth(settings: Settings) -> EnvironmentCheck:
             details="Remote MCP API key is not required in mock mode.",
         )
 
+    if settings.secret_provider.lower() == "key_vault" and settings.key_vault_url:
+        return EnvironmentCheck(
+            name="remote_mcp_auth",
+            status="pass",
+            details="Remote MCP API key is configured through Azure Key Vault.",
+        )
+
     if settings.mcp_api_key:
         return EnvironmentCheck(
             name="remote_mcp_auth",
@@ -154,7 +163,7 @@ def _check_remote_mcp_auth(settings: Settings) -> EnvironmentCheck:
     return EnvironmentCheck(
         name="remote_mcp_auth",
         status="fail",
-        details="Remote MCP mode requires MCP_API_KEY.",
+        details="Remote MCP mode requires MCP_API_KEY or a configured Key Vault provider.",
     )
 
 
@@ -206,6 +215,66 @@ def _check_foundry_resource_context(settings: Settings) -> EnvironmentCheck:
             "Foundry Azure resource context is incomplete: "
             f"{', '.join(missing_names)}."
         ),
+    )
+
+
+def _check_persistence(settings: Settings) -> EnvironmentCheck:
+    mode = settings.persistence_mode.lower()
+    if mode == "memory":
+        return EnvironmentCheck(
+            name="persistence",
+            status="pass",
+            details="Audit and approval persistence is configured for in-memory mode.",
+        )
+
+    if mode == "azure_table" and settings.storage_account_url:
+        return EnvironmentCheck(
+            name="persistence",
+            status="pass",
+            details="Audit and approval persistence is configured for Azure Table Storage.",
+        )
+
+    if mode == "azure_table":
+        return EnvironmentCheck(
+            name="persistence",
+            status="fail",
+            details="Azure Table persistence requires STORAGE_ACCOUNT_URL.",
+        )
+
+    return EnvironmentCheck(
+        name="persistence",
+        status="fail",
+        details="PERSISTENCE_MODE must be memory or azure_table.",
+    )
+
+
+def _check_secret_provider(settings: Settings) -> EnvironmentCheck:
+    provider = settings.secret_provider.lower()
+    if provider == "environment":
+        return EnvironmentCheck(
+            name="secret_provider",
+            status="pass",
+            details="Application secrets are loaded from environment settings.",
+        )
+
+    if provider == "key_vault" and settings.key_vault_url:
+        return EnvironmentCheck(
+            name="secret_provider",
+            status="pass",
+            details="Application secrets are configured for Azure Key Vault.",
+        )
+
+    if provider == "key_vault":
+        return EnvironmentCheck(
+            name="secret_provider",
+            status="fail",
+            details="Azure Key Vault secret loading requires KEY_VAULT_URL.",
+        )
+
+    return EnvironmentCheck(
+        name="secret_provider",
+        status="fail",
+        details="SECRET_PROVIDER must be environment or key_vault.",
     )
 
 

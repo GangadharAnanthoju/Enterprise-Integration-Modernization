@@ -2,7 +2,7 @@
   "mcpServers": [
     {
       "name": "enterpriseintegrationmcp",
-      "description": "Enterprise integration MCP server exposing governed Logic Apps workflows for order, shipment, invoice, integration run, approval, supplier notification, and ServiceNow ticket operations.",
+      "description": "Enterprise integration MCP server exposing governed Logic Apps workflows for order, shipment, invoice, integration run, approval, supplier notification, email notification, and ServiceNow ticket operations.",
       "tools": [
         {
           "name": "getOrderStatus"
@@ -21,6 +21,9 @@
         },
         {
           "name": "sendSupplierNotification"
+        },
+        {
+          "name": "SendEmailNotification"
         },
         {
           "name": "createServiceNowTicket"

@@ -9,6 +9,7 @@ from tools.risk_policy import ExecutionDecision, RiskDecision
 from mcp.exceptions import MissingRequiredEntitiesError
 from mcp.executors import get_mcp_executor
 from mcp.schemas import McpExecutionMode, McpServerConfig, McpToolRequest
+from secret_store import resolve_mcp_api_key
 
 TOOL_ENDPOINT_SETTING_NAMES: dict[str, str] = {
     "getOrderStatus": "mcp_tool_endpoint_get_order_status",
@@ -71,7 +72,7 @@ def load_mcp_config(settings: Settings | None = None) -> McpServerConfig:
         server_name=resolved_settings.mcp_server_name,
         endpoint_url=_blank_to_none(resolved_settings.mcp_server_url),
         timeout_seconds=resolved_settings.mcp_timeout_seconds,
-        api_key=_blank_to_none(resolved_settings.mcp_api_key),
+        api_key=resolve_mcp_api_key(resolved_settings),
         tool_endpoints=_load_tool_endpoints(resolved_settings),
     )
 

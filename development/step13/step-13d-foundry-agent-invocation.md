@@ -14,7 +14,7 @@ New invocation helpers:
 
 | Function or class | Purpose |
 |---|---|
-| `create_foundry_runtime_agent` | Creates a `FoundryAgent` runtime client with Azure CLI credentials |
+| `create_foundry_runtime_agent` | Creates a `FoundryAgent` runtime client with `DefaultAzureCredential` |
 | `invoke_foundry_agent_message_async` | Invokes the configured Foundry agent with one user message |
 | `invoke_foundry_agent_message` | Synchronous wrapper for scripts and demos |
 | `FoundryAgentInvocationResult` | Safe response summary for invocation results |

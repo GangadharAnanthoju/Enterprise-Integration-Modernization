@@ -27,6 +27,13 @@ class Settings(BaseSettings):
     mcp_api_key: str | None = None
     mcp_timeout_seconds: int = 30
     mock_mcp: bool = True
+    secret_provider: str = "environment"
+    mcp_api_key_secret_name: str = "logic-apps-mcp-api-key"
+    persistence_mode: str = "memory"
+    storage_account_url: str | None = None
+    audit_table_name: str = "AgentAuditEvents"
+    approval_requests_table_name: str = "AgentApprovalRequests"
+    approval_decisions_table_name: str = "AgentApprovalDecisions"
     applicationinsights_connection_string: str | None = None
     azure_tenant_id: str | None = None
     azure_client_id: str | None = None

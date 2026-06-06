@@ -2,8 +2,8 @@
 
 from dataclasses import dataclass
 
-from approvals.requests import APPROVAL_DECISIONS, APPROVAL_REQUESTS
-from audit.events import AUDIT_EVENTS, AuditEvent
+from approvals.requests import get_approval_repository
+from audit.events import AuditEvent, get_audit_repository
 from config import Settings
 from config_validation import validate_environment
 from foundry.agent_definition import validate_foundry_agent_definition
@@ -89,11 +89,11 @@ def _check_high_risk_policy() -> ReadinessCheck:
 
 
 def _check_approval_store() -> ReadinessCheck:
-    if isinstance(APPROVAL_REQUESTS, dict) and isinstance(APPROVAL_DECISIONS, dict):
+    if get_approval_repository().is_available():
         return ReadinessCheck(
             name="approval_store",
             status="pass",
-            details="Local approval request and decision stores are available.",
+            details="Approval repository is available.",
         )
 
     return ReadinessCheck(
@@ -104,11 +104,11 @@ def _check_approval_store() -> ReadinessCheck:
 
 
 def _check_audit_store() -> ReadinessCheck:
-    if isinstance(AUDIT_EVENTS, list):
+    if get_audit_repository().is_available():
         return ReadinessCheck(
             name="audit_store",
             status="pass",
-            details="Local audit event store is available.",
+            details="Audit repository is available.",
         )
 
     return ReadinessCheck(

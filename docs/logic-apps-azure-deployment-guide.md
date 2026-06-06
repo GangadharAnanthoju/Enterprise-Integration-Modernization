@@ -601,19 +601,34 @@ This is preferred over wiring each workflow callback URL directly into the agent
 
 This is a disposable learning deployment. WS1 can continue to cost while the resources exist.
 
-When not testing, delete:
+When not testing, the recommended idle cleanup deletes:
 
 - `la-sysint-enterprise-integration-eus`
 - `asp-sysint-enterprise-integration-eus`
-- `stsysintintegeus001`
+- `ca-sysint-enterprise-agent-eus`
 
-Delete script:
+Storage `stsysintintegeus001` is now retained by default because it contains
+durable audit and approval records.
+
+Plan-only cleanup:
 
 ```powershell
 .\infra\scripts\destroy-dev.ps1
 ```
 
-The script asks you to type `DELETE` before removing resources.
+Execute guarded cleanup:
+
+```powershell
+.\infra\scripts\destroy-dev.ps1 `
+  -Execute `
+  -Confirmation "DELETE PROJECT RUNTIME"
+```
+
+See the full cost and recreation guide:
+
+```text
+docs/project-cost-control-runbook.md
+```
 
 ## Files Created Or Updated
 

@@ -50,6 +50,7 @@ WORKFLOWS_LOCATION_NAME=eastus
 | `getOrderStatus` | Read-only order status lookup exposed as the first MCP-backed workflow candidate. |
 | `queryIntegrationRunStatus` | Read-only integration troubleshooting lookup. |
 | `sendSupplierNotification` | Approval-gated supplier notification. |
+| `SendEmailNotification` | Enterprise email notification with text or HTML body support. |
 | `validateInvoice` | Invoice validation before payment processing. |
 
 ## Local Files

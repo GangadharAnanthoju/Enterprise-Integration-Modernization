@@ -9,6 +9,7 @@ param(
         "createServiceNowTicket",
         "getOrderStatus",
         "queryIntegrationRunStatus",
+        "SendEmailNotification",
         "sendSupplierNotification",
         "validateInvoice"
     )

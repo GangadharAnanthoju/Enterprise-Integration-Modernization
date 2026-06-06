@@ -29,6 +29,7 @@ development/
 # Azure / local deployment
 .azure/
 *.log
+agent/data/
 infra/main.json
 logicapps/standard-app/local.settings.json
 logicapps/standard-app/workflow-designtime/

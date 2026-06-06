@@ -1,0 +1,22 @@
+<policies>
+  <inbound>
+    <base />
+    <rate-limit calls="30" renewal-period="60" />
+    <set-header name="X-Enterprise-Gateway" exists-action="override">
+      <value>apim-sysint-common-eus</value>
+    </set-header>
+    <set-header name="Ocp-Apim-Subscription-Key" exists-action="delete" />
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+    <set-header name="X-Content-Type-Options" exists-action="override">
+      <value>nosniff</value>
+    </set-header>
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>

@@ -1,0 +1,11 @@
+{
+  "messageId": "EMAIL-1001",
+  "recipient": "ops-team@contoso.com",
+  "subject": "Integration notification",
+  "bodyType": "Text",
+  "priority": "Normal",
+  "category": "alert",
+  "status": "Sent",
+  "confirmation": "Email notification sent successfully to ops-team@contoso.com.",
+  "correlationId": "local-corr-email-001"
+}
