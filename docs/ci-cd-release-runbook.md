@@ -31,7 +31,7 @@ Create a GitHub Environment named `dev`.
 Configure required reviewers on that environment. The reviewer approval is the
 human release gate before Azure changes begin.
 
-Add these GitHub Environment variables:
+Add or reuse these GitHub repository or `dev` Environment secrets:
 
 ```text
 AZURE_CLIENT_ID
@@ -39,8 +39,9 @@ AZURE_TENANT_ID
 AZURE_SUBSCRIPTION_ID
 ```
 
-They identify the federated deployment identity. No Azure client secret is
-stored in GitHub.
+They identify the federated deployment identity. Despite being stored as
+GitHub secrets, these three identifiers are not credentials by themselves. No
+Azure client secret is required because authentication uses OIDC.
 
 ## Azure OIDC Setup
 
@@ -63,6 +64,21 @@ Grant only the scopes required by the existing deployment scripts:
 - permission to create the Container App managed-identity role assignments
 
 Shared parent resources must not be deleted by the deployment identity.
+
+Current learning identity:
+
+```text
+uami-sysint-github-actions-eastus
+resource group: rg-sysint-ideindity-eastus
+dev federated subject:
+repo:GangadharAnanthoju/Enterprise-Integration-Modernization:environment:dev
+```
+
+`Contributor` can deploy resources but cannot create Azure role assignments.
+For clean runtime recreation, grant a role-assignment-capable role such as
+`Role Based Access Control Administrator` only at the specific scopes where the
+Container App managed identity receives access. Do not grant broad `Owner`
+solely to make the pipeline convenient.
 
 ## CI Validation
 
