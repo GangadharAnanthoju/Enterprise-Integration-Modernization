@@ -13,7 +13,7 @@ permissions:
 jobs:
   validate:
     name: Test and validate
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,6 +49,13 @@ jobs:
       - name: Validate release assets
         shell: pwsh
         run: ./infra/scripts/validate-release-assets.ps1
+
+  container-build:
+    name: Build Linux container image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Validate container image build
         run: docker build --tag enterprise-integration-agent:ci .

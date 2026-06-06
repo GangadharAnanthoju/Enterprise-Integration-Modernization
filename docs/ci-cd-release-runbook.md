@@ -96,7 +96,9 @@ The validation checks:
 - MCP tools mapped to Logic Apps workflows
 - Bicep compilation
 
-CI additionally runs Ruff, all offline tests, and a Docker image build.
+CI additionally runs Ruff and all offline tests on the same Windows toolchain
+used for releases. A separate Linux job validates the production Docker image
+build.
 
 ## Controlled Release
 
