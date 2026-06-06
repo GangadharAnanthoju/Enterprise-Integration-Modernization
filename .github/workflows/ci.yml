@@ -16,10 +16,10 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -64,12 +64,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Validate container image build
         run: |
           set +e
-          docker build --tag enterprise-integration-agent:ci . 2>&1 | tee docker-build.log
+          docker build --file agent/Dockerfile --tag enterprise-integration-agent:ci . 2>&1 | tee docker-build.log
           exit_code=${PIPESTATUS[0]}
           if [ "$exit_code" -ne 0 ]; then
             message=$(tail -n 80 docker-build.log | sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g')

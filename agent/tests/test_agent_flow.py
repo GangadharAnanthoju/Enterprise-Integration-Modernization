@@ -1,9 +1,23 @@
 from fastapi.testclient import TestClient
+from pytest import MonkeyPatch
 
 from main import app
 
 
 client = TestClient(app)
+
+
+def _configure_foundry_readiness_environment(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setenv(
+        "FOUNDRY_PROJECT_ENDPOINT",
+        "https://example.services.ai.azure.com/api/projects/test",
+    )
+    monkeypatch.setenv("MODEL_DEPLOYMENT_NAME", "test-model")
+    monkeypatch.setenv("AZURE_TENANT_ID", "00000000-0000-0000-0000-000000000000")
+    monkeypatch.setenv("AZURE_SUBSCRIPTION_ID", "00000000-0000-0000-0000-000000000000")
+    monkeypatch.setenv("AZURE_RESOURCE_GROUP", "rg-test")
+    monkeypatch.setenv("AZURE_AI_ACCOUNT_NAME", "foundry-test")
+    monkeypatch.setenv("AZURE_AI_PROJECT_NAME", "project-test")
 
 
 def test_health_endpoint_returns_ok() -> None:
@@ -446,7 +460,8 @@ def test_run_local_evaluations_endpoint_returns_passing_results() -> None:
     assert all(result["failures"] == [] for result in body)
 
 
-def test_operations_readiness_endpoint_returns_ready_report() -> None:
+def test_operations_readiness_endpoint_returns_ready_report(monkeypatch: MonkeyPatch) -> None:
+    _configure_foundry_readiness_environment(monkeypatch)
     response = client.get("/operations/readiness")
 
     assert response.status_code == 200
@@ -469,7 +484,8 @@ def test_operations_readiness_endpoint_returns_ready_report() -> None:
     }
 
 
-def test_operations_environment_endpoint_returns_validation_report() -> None:
+def test_operations_environment_endpoint_returns_validation_report(monkeypatch: MonkeyPatch) -> None:
+    _configure_foundry_readiness_environment(monkeypatch)
     response = client.get("/operations/environment")
 
     assert response.status_code == 200

@@ -3,7 +3,18 @@ from foundry.governance import run_readiness_checks
 
 
 def test_readiness_checks_pass_for_local_governed_agent() -> None:
-    report = run_readiness_checks()
+    report = run_readiness_checks(
+        Settings(
+            _env_file=None,
+            foundry_project_endpoint="https://example.services.ai.azure.com/api/projects/test",
+            model_deployment_name="test-model",
+            azure_tenant_id="00000000-0000-0000-0000-000000000000",
+            azure_subscription_id="00000000-0000-0000-0000-000000000000",
+            azure_resource_group="rg-test",
+            azure_ai_account_name="foundry-test",
+            azure_ai_project_name="project-test",
+        )
+    )
 
     assert report.status == "ready"
     assert {check.name for check in report.checks} == {
