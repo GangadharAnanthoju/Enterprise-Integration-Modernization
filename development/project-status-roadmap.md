@@ -4,7 +4,7 @@ Last updated: 2026-06-06
 
 ## Current Position
 
-We have completed through **Step 18I**. Step 18 production hardening is complete.
+We have completed through **Step 19F**. Steps 18 and 19 are complete.
 
 The project now has:
 
@@ -34,6 +34,7 @@ The project now has:
 - exported governed agent audit events to the shared Application Insights workspace
 - placed a curated FastAPI surface behind shared APIM subscription protection
 - added guarded cost-control, cleanup, and runtime recreation runbooks
+- added CI validation, controlled release automation, approval gates, smoke tests, and rollback
 
 ## Current Architecture
 
@@ -275,18 +276,43 @@ Hardening sequence:
 - RBAC - managed identities and least-privilege role assignments deployed
 - cost control - guarded plan-only cleanup and recreation scripts complete
 
+### Step 19 - CI/CD And Release Automation
+
+Step 19 documentation:
+
+```text
+development/step19/step-19a-ci-validation.md
+development/step19/step-19b-image-publishing.md
+development/step19/step-19c-controlled-deployment.md
+development/step19/step-19d-approval-gate.md
+development/step19/step-19e-smoke-tests.md
+development/step19/step-19f-rollback.md
+```
+
+Completed:
+
+- pull request and branch CI
+- Python lint and offline regression tests
+- PowerShell, JSON, MCP registration, and Bicep release validation
+- Docker image build validation
+- immutable commit-SHA image tags
+- manually approved dev releases using Azure OIDC
+- component-scoped deployment
+- APIM post-deployment smoke testing
+- manually approved Container App rollback
+
 ## Recommended Next Step
 
 Start:
 
 ```text
-Step 19 - CI/CD And Release Automation
+Step 20 - Chat User Experience And Operational Views
 ```
 
 First implementation target:
 
 ```text
-Automate tests, image publishing, infrastructure validation, and controlled environment deployment
+Build a simple chatbot UI through APIM with approval and audit views
 ```
 
-The goal is to turn the proven deployment scripts into a repeatable release pipeline.
+The goal is to make the governed agent usable without calling APIs manually.

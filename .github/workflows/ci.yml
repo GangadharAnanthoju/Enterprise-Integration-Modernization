@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - dev
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Test and validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: agent/requirements.txt
+
+      - name: Install Python dependencies
+        working-directory: agent
+        run: python -m pip install -r requirements.txt
+
+      - name: Lint Python
+        working-directory: agent
+        run: python -m ruff check src tests
+
+      - name: Run offline tests
+        working-directory: agent
+        env:
+          SECRET_PROVIDER: environment
+          MCP_API_KEY: ""
+          MOCK_MCP: "true"
+          MCP_EXECUTION_MODE: mock
+          MCP_SERVER_URL: ""
+          PERSISTENCE_MODE: memory
+          AGENT_RUNTIME_MODE: local
+          APPLICATIONINSIGHTS_CONNECTION_STRING: ""
+        run: python -m pytest -q
+
+      - name: Validate release assets
+        shell: pwsh
+        run: ./infra/scripts/validate-release-assets.ps1
+
+      - name: Validate container image build
+        run: docker build --tag enterprise-integration-agent:ci .

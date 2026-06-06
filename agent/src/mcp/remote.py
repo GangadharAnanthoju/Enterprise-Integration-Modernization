@@ -10,7 +10,6 @@ from mcp.exceptions import (
     RemoteMcpAuthenticationError,
     RemoteMcpBackendError,
     RemoteMcpConfigurationError,
-    RemoteMcpNotImplementedError,
     RemoteMcpTimeoutError,
 )
 from mcp.schemas import McpRemoteRequestEnvelope, McpServerConfig, McpToolRequest

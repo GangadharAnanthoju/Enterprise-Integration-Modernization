@@ -6,7 +6,7 @@ API, MCP adapter, and tool policies remain stable as SDKs evolve.
 
 import re
 
-from agent_contracts import AgentChatResult, PlannedAction
+from agent_contracts import AgentChatResult
 from agent_execution import execute_planned_action
 
 

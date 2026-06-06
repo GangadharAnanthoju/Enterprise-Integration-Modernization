@@ -1,0 +1,41 @@
+name: Rollback Agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Existing ACR image tag to restore
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: enterprise-integration-dev-release
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    name: Approved agent rollback
+    runs-on: windows-latest
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Roll back Container App image
+        shell: pwsh
+        run: >
+          ./infra/scripts/rollback-agent-containerapp.ps1
+          -ImageTag "${{ inputs.image_tag }}"
+          -Execute
+          -Confirmation "ROLLBACK AGENT"

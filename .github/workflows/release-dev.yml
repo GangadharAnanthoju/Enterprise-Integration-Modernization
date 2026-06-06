@@ -1,0 +1,93 @@
+name: Release Dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      component:
+        description: Release scope
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - logic-apps
+          - agent
+          - apim
+          - smoke-test
+      image_tag:
+        description: Optional immutable image tag; defaults to the commit SHA
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: enterprise-integration-dev-release
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    name: Release preflight
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: agent/requirements.txt
+
+      - name: Install Python dependencies
+        working-directory: agent
+        run: python -m pip install -r requirements.txt
+
+      - name: Run lint and offline tests
+        working-directory: agent
+        env:
+          SECRET_PROVIDER: environment
+          MCP_API_KEY: ""
+          MOCK_MCP: "true"
+          MCP_EXECUTION_MODE: mock
+          MCP_SERVER_URL: ""
+          PERSISTENCE_MODE: memory
+          AGENT_RUNTIME_MODE: local
+          APPLICATIONINSIGHTS_CONNECTION_STRING: ""
+        run: |
+          python -m ruff check src tests
+          python -m pytest -q
+
+      - name: Validate release assets
+        shell: pwsh
+        run: ./infra/scripts/validate-release-assets.ps1
+
+  release:
+    name: Controlled dev release
+    needs: preflight
+    runs-on: windows-latest
+    environment: dev
+    env:
+      IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run controlled release
+        shell: pwsh
+        run: >
+          ./infra/scripts/invoke-release.ps1
+          -Component "${{ inputs.component }}"
+          -ImageTag "$env:IMAGE_TAG"
+          -Execute
+          -Confirmation "RELEASE DEV"
