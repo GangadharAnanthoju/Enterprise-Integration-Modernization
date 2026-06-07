@@ -12,6 +12,9 @@ Write-Host "Validating release assets" -ForegroundColor Cyan
 $RequiredFiles = @(
     "agent/Dockerfile"
     "agent/requirements.txt"
+    "agent/src/ui/index.html"
+    "agent/src/ui/app.css"
+    "agent/src/ui/app.js"
     "infra/main.bicep"
     "infra/parameters.dev.json"
     "infra/apim/enterprise-agent-api.openapi.yaml"

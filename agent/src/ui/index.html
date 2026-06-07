@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Enterprise Integration Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">EI</div>
+      <div>
+        <h1>Enterprise Integration Agent</h1>
+        <p>Governed operations console</p>
+      </div>
+    </div>
+    <div class="runtime-summary" aria-label="Runtime status">
+      <span id="health-indicator" class="status-dot pending"></span>
+      <span id="health-label">Connecting</span>
+      <span class="divider"></span>
+      <span id="runtime-label">Runtime unavailable</span>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="scenario-pane" aria-label="Test scenarios">
+      <section>
+        <p class="eyebrow">Quick actions</p>
+        <div class="scenario-list">
+          <button class="scenario" type="button" data-prompt="Check order ORD-1001">
+            <span>Order status</span>
+            <small>Low risk · executes directly</small>
+          </button>
+          <button class="scenario" type="button" data-prompt="Check shipment status SHIP-3001">
+            <span>Shipment status</span>
+            <small>Low risk · executes directly</small>
+          </button>
+          <button class="scenario" type="button" data-prompt="Validate invoice INV-2001">
+            <span>Validate invoice</span>
+            <small>Medium risk · governed</small>
+          </button>
+          <button class="scenario high-risk" type="button" data-prompt="Notify supplier about shipment SHIP-3004">
+            <span>Notify supplier</span>
+            <small>High risk · approval required</small>
+          </button>
+        </div>
+      </section>
+      <section>
+        <p class="eyebrow">Execution path</p>
+        <ol class="flow-list">
+          <li><span>01</span>Plan with agent</li>
+          <li><span>02</span>Apply risk policy</li>
+          <li><span>03</span>Approve when required</li>
+          <li><span>04</span>Execute through MCP</li>
+        </ol>
+      </section>
+      <section class="legend">
+        <p class="eyebrow">Risk policy</p>
+        <div><span class="legend-dot low"></span>Low · execute</div>
+        <div><span class="legend-dot medium"></span>Medium · governed</div>
+        <div><span class="legend-dot high"></span>High · approval</div>
+      </section>
+    </aside>
+
+    <section class="chat-pane" aria-label="Agent chat">
+      <div class="pane-title">
+        <div>
+          <p class="eyebrow">Conversation</p>
+          <h2>Integration request</h2>
+        </div>
+        <span class="live-chip"><span></span>Agent online</span>
+      </div>
+      <div id="conversation" class="conversation" aria-live="polite">
+        <article class="message assistant">
+          <div class="message-label">Agent</div>
+          <p>What enterprise integration action should I plan or execute?</p>
+        </article>
+      </div>
+
+      <form id="chat-form" class="composer">
+        <label class="sr-only" for="user-message">Message</label>
+        <textarea
+          id="user-message"
+          rows="2"
+          placeholder="Check order ORD-1001"
+          required
+        ></textarea>
+        <div class="composer-actions">
+          <label class="toggle">
+            <input id="execute-ready" type="checkbox" checked>
+            <span>Execute when policy allows</span>
+          </label>
+          <button id="send-button" class="primary" type="submit">Send</button>
+        </div>
+      </form>
+    </section>
+
+    <aside class="operations-pane" aria-label="Operations details">
+      <nav class="tabs" aria-label="Operational views">
+        <button class="tab active" type="button" data-tab="action">Action</button>
+        <button class="tab" type="button" data-tab="approval">Approval</button>
+        <button class="tab" type="button" data-tab="audit">Audit</button>
+        <button class="tab" type="button" data-tab="runtime">Runtime</button>
+      </nav>
+
+      <section id="tab-action" class="tab-panel active">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Current request</p>
+            <h2>Governed action</h2>
+          </div>
+          <span id="action-status" class="badge neutral">Waiting</span>
+        </div>
+        <dl id="action-details" class="detail-list">
+          <div><dt>Selected tool</dt><dd>None</dd></div>
+          <div><dt>Risk decision</dt><dd>None</dd></div>
+          <div><dt>Correlation ID</dt><dd>None</dd></div>
+        </dl>
+        <div id="entity-list" class="entity-list"></div>
+        <pre id="result-view" class="result-view">No execution result yet.</pre>
+      </section>
+
+      <section id="tab-approval" class="tab-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Human control</p>
+            <h2>Approval decision</h2>
+          </div>
+          <span id="approval-status" class="badge neutral">None</span>
+        </div>
+        <p id="approval-summary" class="muted">High-risk requests will appear here.</p>
+        <form id="approval-form" class="approval-form">
+          <label for="reviewer">Reviewer</label>
+          <input id="reviewer" value="integration-reviewer" required>
+          <label for="approval-comment">Comment</label>
+          <textarea id="approval-comment" rows="3" placeholder="Decision context"></textarea>
+          <div class="button-row">
+            <button id="reject-button" class="secondary danger" type="button" disabled>Reject</button>
+            <button id="approve-button" class="secondary" type="button" disabled>Approve</button>
+            <button id="execute-button" class="primary" type="button" disabled>Execute approved</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="tab-audit" class="tab-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Governance evidence</p>
+            <h2>Audit timeline</h2>
+          </div>
+          <button id="refresh-audit" class="secondary compact" type="button" disabled>Refresh</button>
+        </div>
+        <ol id="audit-list" class="timeline">
+          <li class="empty">Send a request to view its audit trail.</li>
+        </ol>
+      </section>
+
+      <section id="tab-runtime" class="tab-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Control plane</p>
+            <h2>Runtime posture</h2>
+          </div>
+          <button id="refresh-runtime" class="secondary compact" type="button">Refresh</button>
+        </div>
+        <dl id="runtime-details" class="detail-list">
+          <div><dt>Health</dt><dd>Connecting</dd></div>
+          <div><dt>Agent runtime</dt><dd>Loading</dd></div>
+          <div><dt>MCP execution</dt><dd>Loading</dd></div>
+          <div><dt>Readiness</dt><dd>Loading</dd></div>
+        </dl>
+      </section>
+    </aside>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>

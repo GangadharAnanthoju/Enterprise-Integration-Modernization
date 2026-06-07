@@ -4,7 +4,7 @@ Last updated: 2026-06-06
 
 ## Current Position
 
-We have completed through **Step 19F**. Steps 18 and 19 are complete.
+We have completed through **Step 19F** and started **Step 20A**.
 
 The project now has:
 
@@ -35,6 +35,7 @@ The project now has:
 - placed a curated FastAPI surface behind shared APIM subscription protection
 - added guarded cost-control, cleanup, and runtime recreation runbooks
 - added CI validation, controlled release automation, approval gates, smoke tests, and rollback
+- added a FastAPI-hosted operational chat UI with approvals, execution results, audit, and runtime views
 
 ## Current Architecture
 
@@ -301,18 +302,41 @@ Completed:
 - APIM post-deployment smoke testing
 - manually approved Container App rollback
 
+Live release-pipeline exercises are intentionally parked in:
+
+```text
+development/parking-list.md
+```
+
+### Step 20 - Chat User Experience And Operational Views
+
+Step 20 documentation:
+
+```text
+development/step20/step-20a-operational-chat-ui.md
+```
+
+Completed:
+
+- FastAPI-hosted no-build operational UI
+- governed agent chat and execute-when-ready control
+- approval decision and approved-action execution controls
+- audit timeline
+- runtime and readiness posture
+
 ## Recommended Next Step
 
 Start:
 
 ```text
-Step 20 - Chat User Experience And Operational Views
+Step 20B - UI Access Through APIM
 ```
 
 First implementation target:
 
 ```text
-Build a simple chatbot UI through APIM with approval and audit views
+Choose browser authentication and expose the operational UI safely through APIM
 ```
 
-The goal is to make the governed agent usable without calling APIs manually.
+The UI is usable directly from FastAPI. The next decision is how browser users
+authenticate through APIM without embedding a subscription key.
