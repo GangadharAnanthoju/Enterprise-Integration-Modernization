@@ -38,7 +38,10 @@ if ($Component -in @("all", "logic-apps")) {
 }
 
 if ($Component -in @("all", "agent")) {
-    & "$PSScriptRoot\deploy-agent-containerapp.ps1" -ImageTag $ImageTag -Execute
+    & "$PSScriptRoot\deploy-agent-containerapp.ps1" `
+        -ImageTag $ImageTag `
+        -SkipRoleAssignments `
+        -Execute
 }
 
 if ($Component -in @("all", "apim")) {

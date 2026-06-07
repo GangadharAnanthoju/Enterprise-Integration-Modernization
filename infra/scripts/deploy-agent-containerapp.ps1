@@ -18,6 +18,7 @@ param(
     [string]$FoundryAccountName = "ms-foundry-sysint-02",
     [string]$FoundryProjectName = "proj-sysint-01",
     [string]$McpServerUrl = "https://la-sysint-enterprise-integration-eus.azurewebsites.net/api/mcpservers/enterpriseintegrationmcp/mcp",
+    [switch]$SkipRoleAssignments,
     [switch]$Execute
 )
 
@@ -161,31 +162,36 @@ $PrincipalId = az containerapp show `
     --query identity.principalId `
     --output tsv
 
-Write-Host "[4/6] Assigning managed identity roles..." -ForegroundColor Yellow
-az role assignment create `
-    --assignee-object-id $PrincipalId `
-    --assignee-principal-type ServicePrincipal `
-    --role "Key Vault Secrets User" `
-    --scope $KeyVaultId `
-    --output none
-az role assignment create `
-    --assignee-object-id $PrincipalId `
-    --assignee-principal-type ServicePrincipal `
-    --role "Storage Table Data Contributor" `
-    --scope $StorageAccountId `
-    --output none
-az role assignment create `
-    --assignee-object-id $PrincipalId `
-    --assignee-principal-type ServicePrincipal `
-    --role "Azure AI Developer" `
-    --scope $FoundryProjectId `
-    --output none
-az role assignment create `
-    --assignee-object-id $PrincipalId `
-    --assignee-principal-type ServicePrincipal `
-    --role "Monitoring Metrics Publisher" `
-    --scope $ApplicationInsightsId `
-    --output none
+if ($SkipRoleAssignments) {
+    Write-Host "[4/6] Reusing existing managed identity role assignments..." -ForegroundColor Yellow
+}
+else {
+    Write-Host "[4/6] Assigning managed identity roles..." -ForegroundColor Yellow
+    az role assignment create `
+        --assignee-object-id $PrincipalId `
+        --assignee-principal-type ServicePrincipal `
+        --role "Key Vault Secrets User" `
+        --scope $KeyVaultId `
+        --output none
+    az role assignment create `
+        --assignee-object-id $PrincipalId `
+        --assignee-principal-type ServicePrincipal `
+        --role "Storage Table Data Contributor" `
+        --scope $StorageAccountId `
+        --output none
+    az role assignment create `
+        --assignee-object-id $PrincipalId `
+        --assignee-principal-type ServicePrincipal `
+        --role "Azure AI Developer" `
+        --scope $FoundryProjectId `
+        --output none
+    az role assignment create `
+        --assignee-object-id $PrincipalId `
+        --assignee-principal-type ServicePrincipal `
+        --role "Monitoring Metrics Publisher" `
+        --scope $ApplicationInsightsId `
+        --output none
+}
 
 Write-Host "[5/6] Restarting the active revision after RBAC assignment..." -ForegroundColor Yellow
 $RevisionName = az containerapp revision list `
