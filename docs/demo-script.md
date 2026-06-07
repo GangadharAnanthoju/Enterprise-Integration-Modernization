@@ -18,7 +18,7 @@ Expected behavior:
 
 - Agent selects `getOrderStatus`.
 - Risk policy marks it low risk.
-- MCP mock or Logic Apps workflow returns order status.
+- Managed Logic Apps MCP workflow returns order status.
 - Response includes the order status and correlation ID.
 
 ## Scenario 2: Invoice Validation
@@ -67,4 +67,6 @@ Expected behavior:
 
 ## Close
 
-Show the Foundry governance docs, tool catalog, and monitoring plan to connect the demo behavior to production-style controls.
+Show the approval audit trail, managed MCP tool catalog, Application Insights
+telemetry, and GitHub release evidence to connect the demo behavior to
+production-style controls.

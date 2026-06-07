@@ -61,7 +61,7 @@ Grant only the scopes required by the existing deployment scripts:
 - ACR build access
 - Container Apps deployment access
 - project-specific API access inside shared APIM
-- permission to create the Container App managed-identity role assignments
+- access to update the existing Container App and build immutable ACR images
 
 Shared parent resources must not be deleted by the deployment identity.
 
@@ -74,11 +74,12 @@ dev federated subject:
 repo:GangadharAnanthoju/Enterprise-Integration-Modernization:environment:dev
 ```
 
-`Contributor` can deploy resources but cannot create Azure role assignments.
-For clean runtime recreation, grant a role-assignment-capable role such as
-`Role Based Access Control Administrator` only at the specific scopes where the
-Container App managed identity receives access. Do not grant broad `Owner`
-solely to make the pipeline convenient.
+Normal application releases reuse the Container App managed identity's existing
+role assignments and do not require `roleAssignments/write`. Full runtime
+provisioning remains a separate privileged operation. If clean runtime
+recreation is required, grant a role-assignment-capable role only at the
+specific scopes where the Container App managed identity receives access. Do
+not grant broad `Owner` solely to make the pipeline convenient.
 
 ## CI Validation
 
@@ -177,3 +178,18 @@ For each release, retain:
 - selected release scope
 - smoke-test result
 - rollback tag
+
+## Verified Closure Runs
+
+Completed on June 7, 2026:
+
+| Exercise | GitHub Actions run |
+|---|---|
+| Smoke-test-only controlled release | `27095182678` |
+| Immutable agent release | `27095390749` |
+| Rollback to `step18g2` | `27095541474` |
+| Restore latest immutable image | `27095593489` |
+
+The immutable agent release initially exposed an RBAC design issue: application
+releases attempted to recreate managed-identity roles. The release scripts now
+reuse existing RBAC assignments, preserving least-privilege GitHub OIDC access.

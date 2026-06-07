@@ -1,10 +1,11 @@
 # Enterprise Integration Modernization - Project Status Roadmap
 
-Last updated: 2026-06-06
+Last updated: 2026-06-07
 
 ## Current Position
 
-We have completed through **Step 19F** and started **Step 20A**.
+The scoped learning project is complete through **Step 20A**. Secure browser
+authentication and broader target-architecture capabilities are deferred.
 
 The project now has:
 
@@ -90,10 +91,12 @@ In Foundry mode, ready low-risk plans can now execute through the same governed 
 | Azure workflow publishing | Done | Seven Logic Apps workflows published and healthy |
 | MCP workflow metadata | Done | Request trigger and input parameter descriptions added for tool discovery |
 | Logic App runtime upgrade | Done | `WEBSITE_NODE_DEFAULT_VERSION` updated from `~18` to `~24` |
-| Logic Apps MCP server | Done | `enterpriseintegrationmcp` exposes seven workflows as managed MCP tools |
+| Logic Apps MCP server | Done | `enterpriseintegrationmcp` exposes eight workflows as managed MCP tools |
 | Agent to managed MCP | Done | Python remote client uses MCP initialize and tools/call |
 | Live Azure MCP chat test | Done | `/agent/chat` executed `getOrderStatus` through `enterpriseintegrationmcp` |
-| Production hardening plan | In progress | Steps 18B-18H add durable persistence, Key Vault, managed identity hosting, Azure observability, and APIM gateway protection |
+| Production hardening | Done | Durable persistence, Key Vault, managed identity hosting, Azure observability, APIM, and cost controls |
+| Release automation | Done | OIDC release, immutable images, APIM smoke tests, and approved rollback verified live |
+| Operational UI | Done | Chat, approvals, execution results, audit timeline, and runtime posture |
 
 ## Step Summary
 
@@ -115,21 +118,40 @@ In Foundry mode, ready low-risk plans can now execute through the same governed 
 | 15 | Foundry evaluation dataset strategy and JSONL export | Complete |
 | 16 | Azure Logic Apps Standard deployment, workflow publishing, MCP metadata, and MCP server enablement | Complete |
 | 17 | Agent integration with managed Logic Apps MCP server | Complete |
-| 18 | Production hardening | In progress |
+| 18 | Production hardening | Complete |
+| 19 | CI/CD and release automation | Complete |
+| 20A | Operational chat UI and views | Complete |
 
-## Most Recent Commit
+## Closure Status
+
+Final production validation completed on June 7, 2026:
+
+- protected APIM low-risk remote MCP execution passed
+- high-risk approval and approved remote MCP execution passed
+- correlated audit evidence passed
+- correlated Application Insights telemetry passed
+- GitHub OIDC smoke-test release passed
+- immutable image release passed
+- approved rollback and latest-image restore passed
+- final APIM smoke test passed
+
+Final live image:
 
 ```text
-cd04533 Clean up prototype comments after MCP integration
+acrsysintcommoneus.azurecr.io/enterprise-integration-agent:79d3ab947542e4171acbe7af253bff56d716a6c7
 ```
 
-This commit was pushed to:
+See:
 
 ```text
-origin/dev
+docs/project-closure-report.md
+docs/architecture.md
+docs/demo-script.md
+docs/ci-cd-release-runbook.md
+docs/project-cost-control-runbook.md
 ```
 
-## What Is Pending
+## Completed Work Reference
 
 ### Step 15 - Foundry Evaluations
 
@@ -216,11 +238,11 @@ asp-sysint-enterprise-integration-eus
 stsysintintegeus001
 ```
 
-Still pending:
+Closure decision:
 
-- update MCP endpoint environment values
-- connect the agent to the managed Logic Apps MCP server endpoint
-- delete resources when finished testing
+- managed MCP endpoint configuration and agent integration are complete
+- resources remain deployed for demonstrations
+- use the cost-control runbook when idle-cost reduction is desired
 
 ### Step 17 - Agent To Managed Logic Apps MCP
 
@@ -241,14 +263,10 @@ Current verification:
 
 ```text
 MCP transport focused tests: 25 passed
-VS Code MCP discovery: 7 tools discovered
+Managed MCP discovery: 8 tools discovered
 Live FastAPI remote MCP chat test: passed
+High-risk approval and approved remote MCP execution: passed
 ```
-
-Still pending:
-
-- test high-risk approval flow against managed MCP after approval
-- decide when to delete the disposable Azure resources
 
 ### Step 18 - Production Hardening
 
@@ -302,7 +320,7 @@ Completed:
 - APIM post-deployment smoke testing
 - manually approved Container App rollback
 
-Live release-pipeline exercises are intentionally parked in:
+Live release-pipeline exercises completed on June 7, 2026 and are recorded in:
 
 ```text
 development/parking-list.md
@@ -324,19 +342,12 @@ Completed:
 - audit timeline
 - runtime and readiness posture
 
-## Recommended Next Step
+## Deferred Enhancements
 
-Start:
+- Microsoft Entra browser authentication and UI access through APIM
+- private networking and private endpoints
+- full runtime deletion and recreation exercise
+- additional enterprise backends, continuous evaluations, alerts, and workbooks
 
-```text
-Step 20B - UI Access Through APIM
-```
-
-First implementation target:
-
-```text
-Choose browser authentication and expose the operational UI safely through APIM
-```
-
-The UI is usable directly from FastAPI. The next decision is how browser users
-authenticate through APIM without embedding a subscription key.
+These are optional target-architecture enhancements and are not required for
+the completed project scope.

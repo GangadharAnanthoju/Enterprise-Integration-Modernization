@@ -6,10 +6,10 @@ The solution is intentionally built in steps so each platform concern is easy to
 
 1. Repository scaffold
 2. Foundry integration baseline
-3. FastAPI agent shell
+3. API and governance layer
 4. MCP client adapter
 5. Tool registry and risk policy
-6. Mock-mode execution
+6. Managed MCP execution
 7. Tests, infrastructure, pipelines, and documentation
 
 ## Architecture Direction
@@ -24,7 +24,7 @@ The solution is intentionally built in steps so each platform concern is easy to
 
 The Python agent service lives under `agent/`.
 
-Start the FastAPI API from the `agent` folder:
+Start the local API and governance service from the `agent` folder:
 
 ```powershell
 cd C:\Data_AI\projects\Enterprise-Integration-Modernization\agent
@@ -43,10 +43,12 @@ AGENT_RUNTIME_MODE=local
 
 Use `local` for the governed MCP/Logic Apps path. Use `foundry` only when you want `/agent/chat` to call the live Foundry agent in planning-only mode.
 
-The project supports local demo mode without Azure by using:
+Offline tests can isolate Azure dependencies by using:
 
 ```env
 MOCK_MCP=true
 ```
 
-Implementation starts in `agent/`, with supporting contracts in `docs/`, governance in `foundry/`, mock data in `test-data/`, and Azure deployment templates in `infra/`.
+The implemented Azure runtime uses remote managed MCP execution. See
+`docs/project-closure-report.md` for final validation evidence and
+`docs/architecture.md` for implemented versus target architecture.
