@@ -4,8 +4,10 @@ Last updated: 2026-06-07
 
 ## Current Position
 
-The scoped learning project is complete through **Step 20A**. Secure browser
-authentication and broader target-architecture capabilities are deferred.
+The scoped learning project is complete through **Step 20A**. The Logic Apps
+Standard app and dedicated WS1 plan were intentionally deleted after validation
+to reduce idle cost. Secure browser authentication and broader
+target-architecture capabilities are deferred.
 
 The project now has:
 
@@ -141,9 +143,19 @@ Final live image:
 acrsysintcommoneus.azurecr.io/enterprise-integration-agent:79d3ab947542e4171acbe7af253bff56d716a6c7
 ```
 
+Current Azure runtime state:
+
+- Container App/UI: running
+- Azure Table Storage: retained
+- APIM artifacts and shared platform resources: retained
+- Logic Apps Standard app: deleted
+- dedicated WS1 plan: deleted
+- remote MCP execution: expected to fail until Logic Apps is recreated
+
 See:
 
 ```text
+docs/current-runtime-state.md
 docs/project-closure-report.md
 docs/architecture.md
 docs/demo-script.md

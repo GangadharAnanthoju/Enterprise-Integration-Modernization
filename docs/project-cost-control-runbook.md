@@ -82,6 +82,29 @@ project-specific APIM artifacts. It changes nothing.
 
 ## Recommended Idle Cleanup
 
+## Current Idle State
+
+On June 7, 2026, the project entered a partial idle state:
+
+- Logic App Standard app: deleted
+- dedicated WS1 plan: deleted
+- Container App/UI: retained with `minReplicas=0`
+- storage and durable records: retained
+- APIM artifacts: retained
+- shared platform services: retained
+
+Because the Container App remains configured for remote MCP mode, tool
+execution fails until Logic Apps is recreated. This is intentional; there is no
+automatic mock fallback.
+
+For the exact current-state handoff, see:
+
+```text
+docs/current-runtime-state.md
+```
+
+## Full Runtime Idle Cleanup
+
 Plan only:
 
 ```powershell

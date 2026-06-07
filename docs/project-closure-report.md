@@ -54,15 +54,25 @@ ca-sysint-enterprise-agent-eus--0000010
 ## Cost Posture
 
 - The Container App uses `minReplicas=0` and `maxReplicas=2`.
-- The Logic Apps Standard WS1 plan bills while it exists and is the primary
-  project-specific idle cost.
+- The Logic Apps Standard WS1 plan was the primary project-specific idle cost
+  and has now been deleted.
 - Azure Table Storage has a small ongoing storage and transaction cost.
 - APIM, ACR, Key Vault, Foundry, Application Insights, Log Analytics, and the
   Container Apps environment are shared resources and must not be deleted by
   this project.
 
-No resources were deleted during project closure. Use
-`docs/project-cost-control-runbook.md` when idle-cost reduction is desired.
+After project validation, the Logic Apps Standard app and dedicated WS1 plan
+were intentionally deleted to stop the primary idle compute charge:
+
+```text
+la-sysint-enterprise-integration-eus
+asp-sysint-enterprise-integration-eus
+```
+
+The Container App/UI, Azure Table Storage, APIM artifacts, Foundry, Key Vault,
+ACR, Application Insights, Log Analytics, and other shared services remain.
+The UI stays available, while remote MCP execution intentionally fails until
+Logic Apps is recreated. See `docs/current-runtime-state.md`.
 
 The final telemetry correlation ID was:
 

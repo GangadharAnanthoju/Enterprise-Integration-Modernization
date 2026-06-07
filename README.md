@@ -52,3 +52,8 @@ MOCK_MCP=true
 The implemented Azure runtime uses remote managed MCP execution. See
 `docs/project-closure-report.md` for final validation evidence and
 `docs/architecture.md` for implemented versus target architecture.
+
+The Logic Apps Standard app and dedicated WS1 plan are currently deleted to
+reduce idle cost. The Container App/UI remains online, but remote MCP tool
+execution intentionally fails until Logic Apps is recreated. Start a new
+session with `docs/current-runtime-state.md`.
